@@ -5,6 +5,7 @@ django.utils.encoding.smart_text = smart_str
 from django.utils.translation import gettext
 django.utils.translation.ugettext = gettext
 
+import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
@@ -32,25 +33,24 @@ class CommentSerializer(serializers.ModelSerializer):
 def search_posts(request):
     if request.method == 'POST':
         token = request.META.get('HTTP_AUTHORIZATION').split()[1]
-        message = request.POST.get('message', '')
+        content = request.POST.get('content', '')
         
         # 进行JWT验证
         try:
             user = User.objects.get(pk=request.user.id)
         except User.DoesNotExist:
-            return JsonResponse({'error': 'Invalid token'}, status=400)
+            return JsonResponse({'message': 'Invalid token'}, status=400)
         
         # 搜索数据库中含有message的所有帖子
-        posts = Post.objects.filter(content__icontains=message)  # 大小写不敏感
+        posts = Post.objects.filter(content__icontains=content)  # 大小写不敏感
         posts = list(posts)
 
         # 将查询结果序列化为JSON格式
-        serialized_posts = PostSerializer(posts, many=True)
-        
+        print(posts)        
         # 构造返回结果
         response_data = {
             'message': 'Success',
-            'posts': serialized_posts.data
+            'posts': posts
         }
         
         return JsonResponse(response_data)
@@ -93,4 +93,23 @@ def get_one_post(request, id):
 
 
 def get_children_comments(request):
-    pass
+    if request.method == 'POST':
+        json_data = json.loads(request.body)
+        # 处理JSON数据
+        parent_id = json_data.get('parent_id', None)  # 获取JSON数据中的特定字段值
+        post_id = json_data.get('post_id', None)  # 获取JSON数据中的特定字段值
+        
+        children_comments = Comment.objects.filter(is_post_comment=False, parent_id=parent_id, post_id=post_id)
+        for comment in children_comments:
+            comment.user_name = User.objects.get(pk=comment.user_id).username
+            comment.user_avatar = User.objects.get(pk=comment.user_id).avatar
+
+        # 构造返回结果
+        response_data = {
+            'message': 'Success',
+            'children_comments': children_comments
+        }
+        
+        return JsonResponse(response_data, status=200)
+    else:
+        return JsonResponse({'message': 'Method not allowed'}, status=405)

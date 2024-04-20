@@ -41,14 +41,16 @@ def search_posts(request):
         
         # 搜索数据库中含有message的所有帖子
         posts = Post.objects.filter(content__icontains=content)  # 大小写不敏感
-        posts = list(posts)
-        serializer = PostSerializer(posts, many=True)
-        serialized_posts = serializer.data
-        for post in serialized_posts:
-            post['user_name'] = Users.objects.get(pk=post['user']).username
-            post['user_avatar'] = Users.objects.get(pk=post['user']).avatar
-            post['num_comments'] = Comment.objects.filter(post_id=post['id']).count()
-        print('serialized_posts:', serialized_posts)
+        if posts.exists():
+            posts = list(posts)
+            serializer = PostSerializer(posts, many=True)
+            serialized_posts = serializer.data
+            for post in serialized_posts:
+                post['user_name'] = Users.objects.get(pk=post['user']).username
+                post['user_avatar'] = Users.objects.get(pk=post['user']).avatar
+                post['num_comments'] = Comment.objects.filter(post_id=post['id']).count()
+        else:
+            posts = []
         # 将查询结果序列化为JSON格式
         # 构造返回结果
         response_data = {
@@ -75,11 +77,21 @@ def get_one_post(request, id):
             post = Post.objects.get(id=id)
         except Post.DoesNotExist:
             return JsonResponse({'message': 'Post not found'}, status=404)
-        parent_comments = Comment.objects.filter(is_post_comment=True, post=post)
-        parent_comments = list(parent_comments)
-        post = json(post)
-        post['parent_comments'] = parent_comments
-        
+        post = PostSerializer(post).data
+        parent_comments = Comment.objects.filter(is_post_comment=True, post_id=post['id'])
+
+        if parent_comments.exists():
+            parent_comments = list(parent_comments)
+            parent_comments = CommentSerializer(parent_comments, many=True).data
+            for comment in parent_comments:
+                comment['user_name'] = Users.objects.get(pk=comment['user']).username
+                comment['user_avatar'] = Users.objects.get(pk=comment['user']).avatar
+        else :
+            parent_comments = []
+        post['comments'] = parent_comments
+        post['user_name'] = Users.objects.get(pk=post['user']).username
+        post['user_avatar'] = Users.objects.get(pk=post['user']).avatar
+        post['num_comments'] = Comment.objects.filter(post_id=post['id']).count()
         # 构造返回结果
         response_data = {
             'message': 'Success',
@@ -101,12 +113,15 @@ def get_children_comments(request):
         parent_search = Comment.objects.get(id=parent_id)
         post_search = Post.objects.get(id=post_id)
         children_comments = Comment.objects.filter(is_post_comment=False, parent_comment=parent_search, post=post_search)
-        children_comments = list(children_comments)
-        children_comments = CommentSerializer(children_comments,many=True)
-        # for comment in children_comments:
-        #     comment.user_name = Users.objects.get(pk=comment.user_id).username
-        #     comment.user_avatar = Users.objects.get(pk=comment.user_id).avatar
-
+        if children_comments.exists():
+            children_comments = list(children_comments)
+            children_comments = CommentSerializer(children_comments, many=True).data
+            for comment in children_comments:
+                comment['user_name'] = Users.objects.get(pk=comment['user']).username
+                comment['user_avatar'] = Users.objects.get(pk=comment['user']).avatar
+        else:
+            children_comments = []
+       
         # 构造返回结果
         response_data = {
             'message': 'Success',

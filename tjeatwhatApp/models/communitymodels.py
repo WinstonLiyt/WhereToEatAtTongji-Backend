@@ -24,4 +24,4 @@ class Comment(models.Model):
 class Images(models.Model):
     id = models.AutoField(primary_key=True)
     url = models.CharField(max_length=2000)
-    post_id = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)

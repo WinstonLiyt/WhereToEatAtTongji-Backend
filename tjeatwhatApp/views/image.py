@@ -19,7 +19,7 @@ def upload_file(request):
             for i in content:
                 f.write(i)
     
-        return JsonResponse({'message': 'File uploaded successfully'})
+        return JsonResponse({'message': 'File uploaded successfully'},status=200)
     else:
         return JsonResponse({'message': 'Only POST requests with file uploads are allowed'}, status=405)
 

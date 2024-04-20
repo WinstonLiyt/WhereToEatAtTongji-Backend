@@ -2,7 +2,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 import json
-from ..models.restaurantmodels import Tag,Dish,Restaurant
+from ..models.restaurantmodels import Restaurant
+from ..models.dishmodels import  Dish,DishTag
 
 '''菜品的增删改'''
 
@@ -11,10 +12,14 @@ def create_dish(request,id):
     if request.method == 'POST':
         # 获取请求体中的数据
         data = json.loads(request.body)
-        # 解析请求体中的数据
         if 'tags' in data and isinstance(data['tags'], list):
-            # 如果 JSON 数据中包含 'array_data' 键且其值是一个数组
-            tags = data['tags']
+            # 如果 JSON 数据中包含 'tags' 键且其值是一个数组
+            tag_names = data['tags']
+            tags = []
+            # 检查标签是否已存在，不存在则创建新标签
+            for tag_name in tag_names:
+                tag, created = DishTag.objects.get_or_create(name=tag_name)
+                tags.append(tag)
         else:
             return JsonResponse({'error': 'Invalid JSON data format'}, status=400)
        
@@ -22,17 +27,18 @@ def create_dish(request,id):
         rest=Restaurant.objects.get(pk=id)
         description = data.get('description', '')
         image = data.get('image', '')
-        price = float(data.get('phone_number', 0))#转成浮点数
+        price = float(data.get('price', 0))#转成浮点数
 
         # 创建新的店铺记录
         new_dish = Dish.objects.create(
             name=name,
-            tags=tags,
             description=description,
             image=image,
             price=price,
             restaurant=rest,
         )
+
+        new_dish.tags.set(tags)
 
 
         # 构造返回的 JSON 数据
@@ -62,10 +68,21 @@ def update_dish(request,id,dish_id):
 
     if request.method == 'PUT':
         data = json.loads(request.body)
-        dish.name = dish.get('name', dish.name)
-        dish.tags = dish.get('tags', dish.tags)
+     
+        if 'tags' in data:
+            tag_names = data['tags']
+            tags = []
+            for tag_name in tag_names:
+                tag, created = DishTag.objects.get_or_create(name=tag_name)
+                tags.append(tag)
+            dish.tags.set(tags)  # 设置菜品的标签关联
+        # 如果标签数据为空，保留原有的标签关联
+        elif 'tags' not in data and dish.tags.exists():
+            pass
+
+        dish.name = data.get('name', dish.name)
         dish.description = data.get('description', dish.description)
-        dish.price = float(data.get('price', dish.phone_number))
+        dish.price = float(data.get('price', dish.price))
         dish.image=data.get('image',dish.image)
         dish.save()
         return JsonResponse({'message': 'Dish updated successfully'},status=200)
@@ -87,7 +104,7 @@ def delete_dish(request,id,dish_id):
 
     if request.method == 'DELETE':
         dish.delete()
-        return JsonResponse({'message': 'Dish deleted successfully'})
+        return JsonResponse({'message': 'Dish deleted successfully'},status=200)
     else:
         return JsonResponse({'error': 'Only DELETE requests are allowed'}, status=405)
     

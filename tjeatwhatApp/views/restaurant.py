@@ -62,7 +62,7 @@ def update_restaurant(request,id):
         rest.phone_number = data.get('phone_number', rest.phone_number)
         rest.image=data.get('image',rest.image)
         rest.save()
-        return JsonResponse({'message': 'Shop updated successfully'},status=200)
+        return JsonResponse({'message': 'Restaurant updated successfully'},status=200)
     else:
         return JsonResponse({'error': 'Only PUT requests are allowed'}, status=405)
 
@@ -76,7 +76,7 @@ def delete_restaurant(request,id):
 
     if request.method == 'DELETE':
         rest.delete()
-        return JsonResponse({'message': 'Restaurant deleted successfully'})
+        return JsonResponse({'message': 'Restaurant deleted successfully'},status=200)
     else:
         return JsonResponse({'error': 'Only DELETE requests are allowed'}, status=405)
     

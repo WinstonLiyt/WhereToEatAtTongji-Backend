@@ -2,14 +2,22 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.postgres.fields import ArrayField
 
+
+class DishTag(models.Model):
+    id=models.AutoField(primary_key=True)
+    name=models.CharField(max_length=32,unique=True)#标签名
+
+
 class Dish(models.Model):
     id=models.AutoField(primary_key=True)
     name=models.CharField(max_length=32)#店名
-    tags = ArrayField(models.CharField(max_length=20,unique=True))#标签
-    description=models.CharField(max_length=150)#餐品描述
-    image = models.ImageField(upload_to='dishes', max_length=100, blank=True, null=True, verbose_name='餐品图片')  
+    description=models.CharField(max_length=150,null=True)#餐品描述
+    tags = models.ManyToManyField('DishTag')#标签
+    image = models.ImageField(upload_to='images', max_length=100, blank=True, null=True)  
     price=models.DecimalField(max_digits=5,decimal_places=2)
     restaurant = models.ForeignKey("Restaurant", on_delete=models.CASCADE)
+
+
 
 class DishEval(models.Model):
     id=models.AutoField(primary_key=True)

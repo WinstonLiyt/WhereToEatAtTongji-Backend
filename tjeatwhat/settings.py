@@ -77,12 +77,11 @@ WSGI_APPLICATION = 'tjeatwhat.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'TJWhatToEat',
+        'NAME': 'tjwhattoeat',
         'USER': 'root',
-        'PASSWORD': '12345678',
+        'PASSWORD': 'GUOanqi0908',
         'HOST': 'localhost',
         'PORT': '3306',
-
     }
 }
 

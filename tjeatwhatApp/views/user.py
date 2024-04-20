@@ -54,3 +54,4 @@ class WeixinLogin(APIView):
                     # 生成 JWT token，并返回用户对象和 token
                     token = create_token({'user_id': user.id, 'username': user.username})
                     return Response({'code': 10001, 'token': token})
+

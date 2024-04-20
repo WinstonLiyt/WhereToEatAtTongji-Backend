@@ -43,7 +43,7 @@ INSTALLED_APPS = [
 ]
 
 # 微信小程序 AppID 和 AppSecret
-WX_APP_ID = '***'
+WX_APP_ID = '****'
 WX_APP_SECRET = '*****'
 
 #指定用户模块

@@ -23,3 +23,4 @@ urlpatterns = [
     path('user/login/',  UserLogin.as_view()),
     path('user/wx_login/',  WeixinLogin.as_view()),
 ]
+

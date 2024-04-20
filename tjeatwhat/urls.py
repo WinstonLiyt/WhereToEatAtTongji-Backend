@@ -16,9 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from tjeatwhatApp import views
+from tjeatwhatApp.views.user import WeixinLogin,UserLogin
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',  views.hello),
+    path('user/login/',  UserLogin.as_view()),
+    path('user/wx_login/',  WeixinLogin.as_view()),
 ]
+

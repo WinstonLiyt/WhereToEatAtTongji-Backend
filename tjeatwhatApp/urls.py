@@ -10,5 +10,7 @@ urlpatterns = [
     path('restaurant/<int:id>/<int:dish_id>/update/',  views.update_dish,name="update_dish"),
     path('restaurant/<int:id>/<int:dish_id>/delete/',  views.delete_dish,name="delete_dish"),
     path('image/',  views.upload_file,name="upload_image"),
+    path('user/login/',  views.UserLogin.as_view()),
+    path('user/wx_login/',  views.WeixinLogin.as_view()),
     
 ]

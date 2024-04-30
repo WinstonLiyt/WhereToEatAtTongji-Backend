@@ -23,3 +23,4 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('tjeatwhatApp/',  include('tjeatwhatApp.urls')),
 ]
+

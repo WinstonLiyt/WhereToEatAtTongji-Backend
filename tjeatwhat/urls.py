@@ -16,11 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from tjeatwhatApp.views.user import WeixinLogin,UserLogin
-
+# from tjeatwhatApp.views.user import WeixinLogin,UserLogin
+from django.conf.urls import include
+import tjeatwhatApp.urls
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('user/login/',  UserLogin.as_view()),
-    path('user/wx_login/',  WeixinLogin.as_view()),
+    path('tjeatwhatApp/',  include(tjeatwhatApp.urls)),
+    
 ]
 

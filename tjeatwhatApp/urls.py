@@ -1,12 +1,6 @@
 from django.urls import path
 from . import views
 
-urlpatterns = [
-    path('user/login/', views.user.UserLogin.as_view(), name='UserLogin'),
-    path('user/wx_login/', views.user.WeixinLogin.as_view(), name='WeixinLogin'),
-    path('user/test_token/', views.user.TestTokenView.as_view(), name='TestTokenView'),
-    ]
-#TestTokenView
 
 urlpatterns = [
     path('restaurant/create', views.create_restaurant,name="create_restaurant"),
@@ -17,4 +11,9 @@ urlpatterns = [
     path('restaurant/<int:id>/<int:dish_id>/delete/',  views.delete_dish,name="delete_dish"),
     path('image/',  views.upload_file,name="upload_image"),
     
+    #zrx
+    path('user/wx_login/', views.user.WeixinLogin.as_view(), name='WeixinLogin'),
+    path('user/test_token/', views.user.TestTokenView.as_view(), name='TestTokenView'),
+    path('recomend/getAllStore/', views.recommend.getAllStore.as_view(), name='getAllStore'),
+    path('recomend/getAllDishByStoreID/<int:store_id>/', views.recommend.getAllDishByStoreID.as_view(), name='getAllDishByStoreID'),
 ]

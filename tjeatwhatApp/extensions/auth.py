@@ -11,8 +11,16 @@ from jwt import exceptions
 class JwtQueryParamsAuthentication(BaseAuthentication):
     def authenticate(self, request):
         # 获取token并判断token的合法性
-        token = request.query_params.get('token')
-        print(token)
+        #token = request.query_params.get('token')
+        # 获取token并判断token的合法性
+        # 打印请求头
+        print("header:",request.headers)
+        token = request.headers.get('Authorization')
+        if not token:
+            print("token不存在  ")
+        #print("token=",token)
+            #eturn None
+        #print(token)
         # 1.切割
         # 2, 解密第二段/判断过期
         # 3，验证第三段合法性

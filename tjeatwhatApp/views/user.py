@@ -9,9 +9,6 @@ from tjeatwhatApp.models import usermodels
 
 from tjeatwhatApp.utils.jwt_auth import create_token
 
-
-
-
 # class UserLogin(APIView):
 #     authentication_classes = []
 #     def post(self, request,*args,**kwargs):
@@ -60,15 +57,15 @@ class WeixinLogin(APIView):
 
 
 class TestTokenView(APIView):
-    authentication_classes = [JwtQueryParamsAuthentication, ]
+    authentication_classes = [JwtQueryParamsAuthentication]
     def get(self, request, *args, **kwargs):
         
         # 1.切割
         # 2, 解密第二段/判断过期
         # 3，验证第三段合法性
-       
-        print(request.user)
-        print(request.auth)
+        print("request.data:",request.data)
+        print("request.user:",request.user)
+        print("request.auth:",request.auth)
         return Response('成功获取信息')
 
 

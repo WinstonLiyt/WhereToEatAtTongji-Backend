@@ -12,8 +12,14 @@ urlpatterns = [
     path('image/',  views.upload_file,name="upload_image"),
     
     #zrx
-    path('user/wx_login/', views.user.WeixinLogin.as_view(), name='WeixinLogin'),
+    path('user/login/', views.login, name='login'),
+    path('user/studentRegister/', views.student_register, name='student_register'),
+    path('user/storeRegister/',views.store_register, name='store_register'),
     path('user/test_token/', views.test_token_view, name='TestTokenView'),
-    path('recomend/getAllStore/', views.recommend.getAllStore.as_view(), name='getAllStore'),
-    path('recomend/getAllDishByStoreID/<int:store_id>/', views.recommend.getAllDishByStoreID.as_view(), name='getAllDishByStoreID'),
+    path('user/setName/', views.set_name, name='set_name'),
+    path('user/avatar/', views.set_avatar, name='set_avatar'),
+    
+    path('recomend/getAllStore/', views.get_all_store, name='get_all_store'),
+    path('recomend/getAllDishByStoreID/<int:store_id>/', views.get_all_dish_by_store_id, name='getAllDishByStoreID'),
+    path('recomend/getPersonalDish', views.get_dish_by_user_interest, name='get_dish_by_user_interest')
 ]

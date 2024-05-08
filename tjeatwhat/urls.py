@@ -21,7 +21,7 @@ from django.conf.urls import include
 import tjeatwhatApp.urls
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('tjeatwhatApp/',  include(tjeatwhatApp.urls)),
+    path('',  include(tjeatwhatApp.urls)),
     
 ]
 

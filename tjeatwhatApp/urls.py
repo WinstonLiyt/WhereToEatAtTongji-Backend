@@ -13,7 +13,7 @@ urlpatterns = [
     
     #zrx
     path('user/wx_login/', views.user.WeixinLogin.as_view(), name='WeixinLogin'),
-    path('user/test_token/', views.user.TestTokenView.as_view(), name='TestTokenView'),
+    path('user/test_token/', views.test_token_view, name='TestTokenView'),
     path('recomend/getAllStore/', views.recommend.getAllStore.as_view(), name='getAllStore'),
     path('recomend/getAllDishByStoreID/<int:store_id>/', views.recommend.getAllDishByStoreID.as_view(), name='getAllDishByStoreID'),
 ]

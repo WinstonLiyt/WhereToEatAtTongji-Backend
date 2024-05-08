@@ -6,7 +6,7 @@ from tjeatwhatApp.extensions.auth import JwtQueryParamsAuthentication
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from tjeatwhatApp.models import usermodels
-
+from rest_framework.decorators import api_view, authentication_classes
 from tjeatwhatApp.utils.jwt_auth import create_token
 
 # class UserLogin(APIView):
@@ -56,16 +56,23 @@ class WeixinLogin(APIView):
 
 
 
-class TestTokenView(APIView):
-    authentication_classes = [JwtQueryParamsAuthentication]
-    def get(self, request, *args, **kwargs):
+# class TestTokenView(APIView):
+#     authentication_classes = [JwtQueryParamsAuthentication]
+#     def get(self, request, *args, **kwargs):
         
-        # 1.切割
-        # 2, 解密第二段/判断过期
-        # 3，验证第三段合法性
-        print("request.data:",request.data)
-        print("request.user:",request.user)
-        print("request.auth:",request.auth)
-        return Response('成功获取信息')
+#         # 1.切割
+#         # 2, 解密第二段/判断过期
+#         # 3，验证第三段合法性
+#         print("request.data:",request.data)
+#         print("request.user:",request.user)
+#         print("request.auth:",request.auth)
+#         return Response('成功获取信息')
 
 
+@api_view(['GET'])
+@authentication_classes([JwtQueryParamsAuthentication])
+def test_token_view(request):
+    print("request.data:",request.data)
+    print("request.user:",request.user)
+    print("request.auth:",request.auth)
+    return Response('成功获取信息')

@@ -8,7 +8,7 @@ class MyappTestCase(TestCase):
     def setUp(self):
         # 创建一个测试用户
         self.user = Users.objects.create(username='test_user', avatar='test@example.com')
-        print(self.user.id)
+        print('user_id  ',self.user.id)
         
         # 创建一个测试帖子
         self.post = Post.objects.create(user=self.user, title='Test Title', content='Test Content')

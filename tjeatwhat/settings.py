@@ -43,8 +43,8 @@ INSTALLED_APPS = [
 ]
 
 # 微信小程序 AppID 和 AppSecret
-WX_APP_ID = '****'
-WX_APP_SECRET = '*****'
+WX_APP_ID = 'wxb936af7f873567cb'
+WX_APP_SECRET = '3282e45160d1ddea5ce443440f4c1168'
 
 #指定用户模块
 # AUTH_USER_MODEL = 'tjeatwhatApp.User'

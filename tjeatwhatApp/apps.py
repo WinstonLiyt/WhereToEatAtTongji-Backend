@@ -9,3 +9,13 @@ class TjeatwhatappConfig(AppConfig):
 
     def ready(self):
         import tjeatwhatApp.signals  # 导入信号接收器
+        
+
+
+        
+
+
+
+
+
+    

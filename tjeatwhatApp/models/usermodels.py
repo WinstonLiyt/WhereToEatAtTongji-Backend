@@ -1,4 +1,5 @@
 import hashlib
+from rest_framework import serializers
 
 from django.conf import settings
 # from django.contrib.auth.models import AbstractUser
@@ -7,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class User(models.Model):
-
+    id=models.AutoField(primary_key=True)
     USER_TYPE = ((1, '顾客'),
                  (2, '商家'),
                  (3,'管理员'),
@@ -47,3 +48,7 @@ class User(models.Model):
     #     super().save(*args, **kwargs)
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'openid', 'wx_nickname', 'wx_avatar_url', 'type', 'credits','token']

@@ -19,6 +19,7 @@ class RecommendTest(TestCase):
         )
         self.token=create_token({'id': self.user.id,'openid': self.user.openid})
 
+<<<<<<< HEAD
         # 创建一个菜品标签
         self.tag1 = DishTag.objects.create(name='烧烤')
         self.tag2 = DishTag.objects.create(name='火锅')
@@ -41,6 +42,23 @@ class RecommendTest(TestCase):
 
     def test_get_all_store(self):
         print("test1:随机推荐中获取所有餐厅***********************")
+=======
+    def test_user_model(self):
+        print('\n')
+        print('test1:测试用户创建')
+        self.assertEqual(self.user.wx_nickname, 'stu1')
+        print('\n')
+
+    def test_login(self):
+        print('\n')
+        print("test2:测试token生成")
+        # 构造 POST 请求数据
+        data = {
+            'wx_nickname': 'stu1',
+        }
+        self.assertEqual(self.user.username, 'stu1')
+        self.assertEqual(self.user.password, '333')
+>>>>>>> origin/gx
         # 发送 POST 请求
         token = self.token
         # 设置请求头
@@ -241,6 +259,7 @@ class UserTestCase(TestCase):
         print('\n')
 
     
+<<<<<<< HEAD
 
 
 
@@ -350,3 +369,5 @@ class UserTestCase(TestCase):
 #         self.assertEqual(response.data, '成功获取信息')
 #         print('\n')
 
+=======
+>>>>>>> origin/gx

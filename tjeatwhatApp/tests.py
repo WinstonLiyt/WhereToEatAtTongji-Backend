@@ -50,7 +50,8 @@ class MyappTestCase(TestCase):
     def test_get_one_post_view(self):
         print('test4')
         # 发送GET请求
-        response = self.client.get(reverse('get_one_post', kwargs={'id': self.post.id}))
+        data = {'id': self.post.id, 'user_id': self.user.id}
+        response = self.client.post(reverse('get_one_post'), json.dumps(data), content_type='application/json')
 
         # 检查响应状态码
         self.assertEqual(response.status_code, 200)

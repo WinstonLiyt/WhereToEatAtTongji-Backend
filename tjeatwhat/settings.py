@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-g7p(6ctcbk-@8#!-5p2$e+!_sef79vo(dr_r*mm6qtjwixuxqb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -45,8 +45,8 @@ INSTALLED_APPS = [
 ]
 
 # 微信小程序 AppID 和 AppSecret
-WX_APP_ID = '****'
-WX_APP_SECRET = '*****'
+WX_APP_ID = 'wxb936af7f873567cb'
+WX_APP_SECRET = '3282e45160d1ddea5ce443440f4c1168'
 
 #指定用户模块
 # AUTH_USER_MODEL = 'tjeatwhatApp.User'

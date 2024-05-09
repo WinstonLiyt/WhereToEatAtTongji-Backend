@@ -235,7 +235,7 @@ def comment_post(request):
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
-
+# @authentication_classes([JSONWebTokenAuthentication])
 def reply_comment(request):
     if request.method == 'POST':
         # 检查请求体中的JSON数据
@@ -285,7 +285,7 @@ def reply_comment(request):
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
     
-
+# @authentication_classes([JSONWebTokenAuthentication])
 def change_post_reaction(request):
     if request.method == 'PUT':
         # 解析请求体中的JSON数据
@@ -357,6 +357,7 @@ def change_post_reaction(request):
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
+# @authentication_classes([JSONWebTokenAuthentication])
 def delete_comment(request):
     if request.method == 'DELETE':
         # 获取查询参数
@@ -380,6 +381,7 @@ def delete_comment(request):
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
+# @authentication_classes([JSONWebTokenAuthentication])
 def change_comment_reaction(request):
     if request.method == 'PUT':
         try:
@@ -390,9 +392,6 @@ def change_comment_reaction(request):
         change = json_data.get('change')
         user_id = json_data.get('user_id')
         comment_id = json_data.get('comment_id')
-
-        # 在这里执行更新评论的操作
-        # 例如，根据提供的评论ID增加或减少点赞数
 
         # 检查必需的参数
         if comment_id is None or change is None :

@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -38,8 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'tjeatwhatApp.apps.TjeatwhatappConfig',
     'rest_framework',
-    'tjeatwhatApp',
+    #'tjeatwhatApp',
 ]
 
 # 微信小程序 AppID 和 AppSecret
@@ -125,7 +127,7 @@ TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -135,7 +137,7 @@ STATIC_URL = 'static/'
 
 
 # 图片地址
-MEDIA_URL = '/media/'
+MEDIA_URL = '/media/images/'
 MEDIA_ROOT = BASE_DIR / 'static/media'
 
 

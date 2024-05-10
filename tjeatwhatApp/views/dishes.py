@@ -272,4 +272,3 @@ def search(request,name):
 
 
 
-'''顾客查看菜品的评价'''

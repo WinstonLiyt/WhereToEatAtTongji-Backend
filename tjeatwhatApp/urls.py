@@ -21,9 +21,6 @@ urlpatterns = [
     path('image/',  views.upload_file,name="upload_image"),
 
 
-    # path('user/login/',  views.UserLogin.as_view()),
-    path('user/wx_login/',  views.WeixinLogin.as_view()),
-    path('user/test_token/', views.user.TestTokenView.as_view(), name='TestTokenView'),
     
     #zrx
     path('user/login/', views.login, name='login'),

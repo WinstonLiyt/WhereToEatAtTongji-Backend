@@ -122,8 +122,10 @@ def store_register(request,*args,**kwargs):
                     name=name,
                     location=location,
                     phone_number=phone,
-                    image=avatar_url
+                    owner=user
+                    # images=[avatar_url]
                 )
+                restaurant.images.set([avatar_url])
                 # 生成 JWT token，并返回用户对象和 token
                 token = create_token({'id': user.id,'openid': user.openid})
                 return Response({ 'token': token}, status=200)

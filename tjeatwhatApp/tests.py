@@ -1,39 +1,68 @@
 from django.test import TestCase, Client
 from rest_framework.test import APIClient
 from .models.usermodels import User
-from .models.restaurantmodels import Restaurant
-from .models.dishmodels import Dish,DishTag
+from .models.restaurantmodels import Restaurant,RestImage,RestTag
+from .models.dishmodels import Dish,DishTag,DishEval
 from tjeatwhatApp.utils.jwt_auth import create_token
 from rest_framework import status
 from django.urls import reverse
 from unittest.mock import patch
 import json
+from datetime import datetime
+
 
 
 
 class RecommendTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(
-            openid='666'
-        )
-        self.token=create_token({'id': self.user.id,'openid': self.user.openid})
+        self.user = User.objects.create(openid='666',nickname ='abc',avatar_url = 'xxx',type = 1,credits=0,token = 1)
+        self.user2=User.objects.create(openid='777',nickname ='sb',avatar_url = 'xxx',type = 1,credits=0,token = 1)
+        self.user3=User.objects.create(openid='888',nickname ='def',avatar_url = 'xxx',type = 1,credits=0,token = 1)
 
-<<<<<<< HEAD
+        self.token=create_token({'id': self.user.id,'openid': self.user.openid})
+        self.token2=create_token({'id': self.user2.id,'openid': self.user2.openid})
+        self.token3=create_token({'id': self.user3.id,'openid': self.user3.openid})
         # 创建一个菜品标签
         self.tag1 = DishTag.objects.create(name='烧烤')
         self.tag2 = DishTag.objects.create(name='火锅')
+        self.tag3=DishTag.objects.create(name='焦糖')
+        self.tag4=DishTag.objects.create(name='快乐水')
+        
+
+        self.rest_image1=RestImage.objects.create(image='test_image.jpg')
+        self.rest_image2=RestImage.objects.create(image='test_image.jpg')
 
         # 创建一些用于测试的样本餐厅
-        self.restaurant1=Restaurant.objects.create(name='餐厅1', location='地址1', phone_number='1234567890',description='Description1',image='test_image.jpg')
-        self.restaurant2=Restaurant.objects.create(name='餐厅2', location='地址2', phone_number='0987654321',description='Description2',image='test_image.jpg')
+        self.restaurant1=Restaurant.objects.create(name='餐厅1', owner=self.user,location='地址1', phone_number='1234567890',description='Description1')
+        self.restaurant2=Restaurant.objects.create(name='餐厅2', owner=self.user,location='地址2', phone_number='0987654321',description='Description2')
+        self.restaurant3=Restaurant.objects.create(name='饮料店',owner=self.user,location='B楼',description='太酷了',phone_number='456789')
+        self.restaurant1.images.set([self.rest_image1])
+        self.restaurant2.images.set([self.rest_image2])
+        self.restaurant3.images.set([self.rest_image1])
 
-        self.dish1 = Dish.objects.create(name='Dish 1', description='dishDescription 1', price=10.50, restaurant=self.restaurant1,image='test_image.jpg')
-        self.dish2 = Dish.objects.create(name='Dish 2', description='dishDescription 2', price=15.75, restaurant=self.restaurant1,image='test_image.jpg')
-
+        self.dish1 = Dish.objects.create(name='烧烤', description='dishDescription 1', price=10.50, restaurant=self.restaurant1,image='test_image.jpg')
+        self.dish2 = Dish.objects.create(name='火锅', description='dishDescription 2', price=15.75, restaurant=self.restaurant1,image='test_image.jpg')
+        self.dish3 = Dish.objects.create(name='羊肉串', description='dishDescription 2', price=15.75, restaurant=self.restaurant1,image='test_image.jpg')
+        self.dish4 = Dish.objects.create(name='牛肉串', description='dishDescription 2', price=15.75, restaurant=self.restaurant1,image='test_image.jpg')
         
+        self.dish5 = Dish.objects.create(name='可乐', description='dishDescription 2', price=15.75, restaurant=self.restaurant3,image='test_image.jpg')
+        self.dish6 = Dish.objects.create(name='雪碧', description='dishDescription 2', price=15.75, restaurant=self.restaurant3,image='test_image.jpg')
+        self.dish7 = Dish.objects.create(name='盐汽水', description='dishDescription 2', price=15.75, restaurant=self.restaurant3,image='test_image.jpg')
+
         self.dish1.tags.add(self.tag1)
         self.dish2.tags.add(self.tag2)
+        self.dish3.tags.add(self.tag1)
+        self.dish4.tags.add(self.tag1)
+        self.dish5.tags.add(self.tag4)
+        self.dish6.tags.add(self.tag4)
+        self.dish7.tags.add(self.tag4)
+
+        self.dish_eval1=DishEval.objects.create(score=5,dish=self.dish5,user=self.user2,comment='非常棒',time=datetime.now())
+        self.dish_eval1=DishEval.objects.create(score=5,dish=self.dish4,user=self.user2,comment='非常棒bang',time=datetime.now())
+        self.dish_eval2=DishEval.objects.create(score=1,dish=self.dish3,user=self.user2,comment='非常差',time=datetime.now())
+
+
 
         self.url1 = reverse('get_all_store')  # 假设您已经正确设置了URL模式名称
         self.url2 = reverse('getAllDishByStoreID', kwargs={'store_id': self.restaurant1.id})
@@ -42,23 +71,6 @@ class RecommendTest(TestCase):
 
     def test_get_all_store(self):
         print("test1:随机推荐中获取所有餐厅***********************")
-=======
-    def test_user_model(self):
-        print('\n')
-        print('test1:测试用户创建')
-        self.assertEqual(self.user.wx_nickname, 'stu1')
-        print('\n')
-
-    def test_login(self):
-        print('\n')
-        print("test2:测试token生成")
-        # 构造 POST 请求数据
-        data = {
-            'wx_nickname': 'stu1',
-        }
-        self.assertEqual(self.user.username, 'stu1')
-        self.assertEqual(self.user.password, '333')
->>>>>>> origin/gx
         # 发送 POST 请求
         token = self.token
         # 设置请求头
@@ -101,7 +113,7 @@ class RecommendTest(TestCase):
     def test_get_dish_by_personalinterest(self):
         print("test5:根据个人兴趣获取菜品***********************")
         # 发送 POST 请求
-        token = self.token
+        token = self.token2
         # 设置请求头
         headers = {'HTTP_AUTHORIZATION': token}
         response = self.client.get(self.url3,**headers)
@@ -110,6 +122,9 @@ class RecommendTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         print('\n')
         
+
+
+
 #用户访问数据测试
 class UserTestCase(TestCase):
     def setUp(self):
@@ -119,7 +134,8 @@ class UserTestCase(TestCase):
             type=1
         )
         self.token=create_token({'id': self.user.id,'openid': self.user.openid})
-
+        self.rest_image=RestImage.objects.create(image='test_image.jpg')
+        self.rest_image1=RestImage.objects.create(image='test_image.jpg')
     def test_set_username_success(self):
         print("test10:设置用户名***********************")
         url = reverse('set_name')
@@ -197,7 +213,7 @@ class UserTestCase(TestCase):
         data = {
             'code': 'mock_code',
             'name': 'mock_name',
-            'avatar_url': 'mock_avatar_url'
+            'avatar_url': 1
             # 根据需要设置其他字段
         }
 
@@ -228,7 +244,7 @@ class UserTestCase(TestCase):
             'name': 'mock_name',
             'location': 'mock_location',
             'phone': 'mock_phone',
-            'avatar_url': 'mock_avatar_url'
+            'avatar_url': 1
             # 根据需要设置其他字段
         }
 
@@ -259,7 +275,6 @@ class UserTestCase(TestCase):
         print('\n')
 
     
-<<<<<<< HEAD
 
 
 
@@ -369,5 +384,3 @@ class UserTestCase(TestCase):
 #         self.assertEqual(response.data, '成功获取信息')
 #         print('\n')
 
-=======
->>>>>>> origin/gx

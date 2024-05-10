@@ -3,11 +3,11 @@ from . import views
 
 
 urlpatterns = [
-    path('restaurant/<int:user_id>/create', views.create_restaurant,name="create_restaurant"),
+    path('restaurant/<int:user_id>/create/', views.create_restaurant,name="create_restaurant"),
     path('restaurant/<int:rest_id>/update/',  views.update_restaurant,name="update_restaurant"),
     path('restaurant/<int:rest_id>/delete/',  views.delete_restaurant,name="delete_restaurant"),
-    path('dish/<int:rest_id>/',views.get_rest,name='get_rest'),
-    path('dish/<int:rest_id>/create', views.create_dish,name="create_dish"),
+    path('restaurant/<int:rest_id>/',views.get_rest,name='get_rest'),
+    path('dish/<int:rest_id>/create/', views.create_dish,name="create_dish"),
     path('dish/<int:dish_id>/update/',  views.update_dish,name="update_dish"),
     path('dish/<int:dish_id>/delete/',  views.delete_dish,name="delete_dish"),
     path('dish/<int:dish_id>/eval/',views.get_dish_eval,name='get_dish_eval'),

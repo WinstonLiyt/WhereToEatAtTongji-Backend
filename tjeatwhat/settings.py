@@ -90,7 +90,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'TJEatWhat',
         'USER': 'root',
-        'PASSWORD': '610381',
+        'PASSWORD': '2024',
         'HOST': 'localhost',
         'PORT': '3306',
 
@@ -137,7 +137,7 @@ STATIC_URL = 'static/'
 
 
 # 图片地址
-MEDIA_URL = '/media/images/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'static/media'
 
 

@@ -167,7 +167,7 @@ def get_all_rest(request):
         return JsonResponse({'message': 'Only GET requests are allowed'}, status=405)
     
 
-@csrf_exempt  #正式上线时去掉
+#@csrf_exempt  #正式上线时去掉
 def get_rest(request,rest_id):
     if request.method == 'GET':
          try:

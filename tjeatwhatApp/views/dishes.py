@@ -6,7 +6,6 @@ from ..models.restaurantmodels import Restaurant,RestaurantSerializer
 from ..models.dishmodels import  Dish,DishTag,DishSerializer,DishEval,DishEvalSerializer
 from django.db.models import Avg
 from ..models.usermodels import User
-import jieba 
 from ..apps import TjeatwhatappConfig
 from rest_framework.response import Response
 
@@ -238,12 +237,11 @@ def search(request,name):
         return set(list_char)&set(list(str))
     if request.method == 'GET':
         try:
-            sim=TjeatwhatappConfig.model.most_similar(name, topn=10)
-            sims=[jieba.lcut(i[0]) for i in sim] #二维列表
-            simss=set(item for sublist in sims for item in sublist)
-            print(simss)
-            expanded_words = list(set(name).union(simss))
-            # expanded_words =jieba.lcut(name)
+            # sim=TjeatwhatappConfig.model.most_similar(name, topn=10)
+            # simss=set([i[0] for i in sim])
+            # print(simss)
+            # expanded_words = list(set(name).union(simss))
+            expanded_words =name
             all_restaurants = Restaurant.objects.all()
             all_dishes=Dish.objects.all()
 

@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,7 +27,7 @@ SECRET_KEY = 'django-insecure-g7p(6ctcbk-@8#!-5p2$e+!_sef79vo(dr_r*mm6qtjwixuxqb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -38,13 +39,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'tjeatwhatApp.apps.TjeatwhatappConfig',
     'rest_framework',
-    'tjeatwhatApp',
+    #'tjeatwhatApp',
 ]
 
 # 微信小程序 AppID 和 AppSecret
-WX_APP_ID = '****'
-WX_APP_SECRET = '*****'
+WX_APP_ID = 'wxb936af7f873567cb'
+WX_APP_SECRET = '3282e45160d1ddea5ce443440f4c1168'
 
 #指定用户模块
 # AUTH_USER_MODEL = 'tjeatwhatApp.User'
@@ -86,9 +88,9 @@ WSGI_APPLICATION = 'tjeatwhat.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'TJWhatToEat',
+        'NAME': 'TJEatWhat',
         'USER': 'root',
-        'PASSWORD': '12345678',
+        'PASSWORD': '2024',
         'HOST': 'localhost',
         'PORT': '3306',
 
@@ -125,7 +127,7 @@ TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)

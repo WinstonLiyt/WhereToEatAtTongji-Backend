@@ -2,7 +2,7 @@ from django.conf import settings
 
 from weixin import WXAPPAPI
 from weixin.oauth2 import OAuth2AuthExchangeError
-
+from tjeatwhatApp.extensions.auth import JwtQueryParamsAuthentication
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from tjeatwhatApp.models import usermodels
@@ -12,20 +12,21 @@ from tjeatwhatApp.utils.jwt_auth import create_token
 
 
 
-class UserLogin(APIView):
-    authentication_classes = []
-    def post(self, request,*args,**kwargs):
-        print("request.data: ",request.data)
-        username = request.data.get('name')
-        pwd = request.data.get('password')
-        #过滤数据库中的数据，如果有对应的数据则返回第一个
-        user_obj=usermodels.User.objects.filter(username=username,password=pwd).first()
+# class UserLogin(APIView):
+#     authentication_classes = []
+#     def post(self, request,*args,**kwargs):
+#         print("request.data: ",request.data)
+#         username = request.data.get('name')
+#         pwd = request.data.get('password')
+#         #过滤数据库中的数据，如果有对应的数据则返回第一个
+#         user_obj=usermodels.User.objects.filter(username=username,password=pwd).first()
 
-        if not user_obj:
-            return Response({'code':1000,'msg':'用户名或密码错误'})
-        #如果找到就生成token
-        token=create_token({'user_id': user_obj.id, 'username': user_obj.username})
-        return Response({'code': 10001, 'token': token})
+#         if not user_obj:
+#             return Response({'code':1000,'msg':'用户名或密码错误'})
+#         #如果找到就生成token
+#         token=create_token({'user_id': user_obj.id, 'username': user_obj.username})
+        
+#         return Response({'code': 10001, 'token': token})
     
 class WeixinLogin(APIView):
     authentication_classes = []
@@ -52,6 +53,22 @@ class WeixinLogin(APIView):
                     if not user:
                         user = usermodels.User.objects.create(openid=openid)
                     # 生成 JWT token，并返回用户对象和 token
-                    token = create_token({'user_id': user.id, 'username': user.username})
+                    token = create_token({'user_id': user.openid})
                     return Response({'code': 10001, 'token': token})
+
+
+
+
+class TestTokenView(APIView):
+    authentication_classes = [JwtQueryParamsAuthentication, ]
+    def get(self, request, *args, **kwargs):
+        
+        # 1.切割
+        # 2, 解密第二段/判断过期
+        # 3，验证第三段合法性
+       
+        print(request.user)
+        print(request.auth)
+        return Response('成功获取信息')
+
 

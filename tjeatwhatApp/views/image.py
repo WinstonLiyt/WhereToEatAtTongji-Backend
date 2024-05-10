@@ -30,4 +30,3 @@ def upload_file(request):
         return JsonResponse({'message': 'Only POST requests with file uploads are allowed'}, status=405)
 
 
-

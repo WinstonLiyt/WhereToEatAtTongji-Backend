@@ -21,9 +21,17 @@ urlpatterns = [
     path('image/',  views.upload_file,name="upload_image"),
 
 
-    # path('user/login/',  views.UserLogin.as_view()),
-    path('user/wx_login/',  views.WeixinLogin.as_view()),
-    path('user/test_token/', views.user.TestTokenView.as_view(), name='TestTokenView'),
     
+    #zrx
+    path('user/login/', views.login, name='login'),
+    path('user/studentRegister/', views.student_register, name='student_register'),
+    path('user/storeRegister/',views.store_register, name='store_register'),
+    path('user/test_token/', views.test_token_view, name='TestTokenView'),
+    path('user/setName/', views.set_name, name='set_name'),
+    path('user/avatar/', views.set_avatar, name='set_avatar'),
+    
+    path('recomend/getAllStore/', views.get_all_store, name='get_all_store'),
+    path('recomend/getAllDishByStoreID/<int:store_id>/', views.get_all_dish_by_store_id, name='getAllDishByStoreID'),
+    path('recomend/getPersonalDish', views.get_dish_by_user_interest, name='get_dish_by_user_interest')
 ]
 

@@ -27,9 +27,9 @@ class User(models.Model):
     # 微信账号相关信息
     openid = models.CharField('微信openid', max_length=100, unique=True)
     # unionid = models.CharField('微信unionid', max_length=100, unique=True, blank=True, null=True)
-    wx_nickname = models.CharField('微信昵称', max_length=100, blank=True, null=True)
-    wx_avatar_url = models.URLField('微信头像', blank=True, null=True)
-
+    nickname = models.CharField('微信昵称', max_length=100, blank=True, null=True)
+    avatar_url = models.URLField('微信头像', blank=True, null=True)
+    signature = models.CharField('个性签名', max_length=100, blank=True, null=True)
     type = models.IntegerField('用户类型', choices=USER_TYPE, default=1)
     credits = models.IntegerField('经验值', default=0)
     token = models.IntegerField('牌子', choices=TOKEN_TYPE, default=1)
@@ -51,4 +51,4 @@ class User(models.Model):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'openid', 'wx_nickname', 'wx_avatar_url', 'type', 'credits','token']
+        fields = ['id', 'openid', 'nickname', 'avatar_url', 'type', 'credits','token']

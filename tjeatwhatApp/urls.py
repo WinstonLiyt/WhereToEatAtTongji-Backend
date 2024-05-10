@@ -9,8 +9,10 @@ urlpatterns = [
     path('posts/details/', views.get_one_post, name='get_one_post'),
     path('posts/getcomments/', views.get_children_comments, name='get_children_comments'),
     path('posts/reply_comment/', views.reply_comment, name='reply_comment'),
-    path('posts/change_post_reaction', views.change_post_reaction, name='change_reaction'),
-    path('posts/delete_comment', views.delete_comment, name='delete_comment'),
-    path('posts/change_comment_reaction', views.change_comment_reaction, name='delete_reply'),
+    path('posts/change_post_reaction/', views.change_post_reaction, name='change_reaction'),
+    path('posts/delete_comment/', views.delete_comment, name='delete_comment'),
+    path('posts/change_comment_reaction/', views.change_comment_reaction, name='delete_reply'),
+    path('uploads/', views.upload_image, name='upload_image'),
+    path('create/', views.create_user, name='create_user'),
    
 ]

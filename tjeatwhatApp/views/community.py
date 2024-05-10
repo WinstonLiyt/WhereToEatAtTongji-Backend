@@ -2,9 +2,11 @@
 import django
 from django.utils.encoding import smart_str
 django.utils.encoding.smart_text = smart_str
+from django.conf import settings
+import os
 from django.utils.translation import gettext
 django.utils.translation.ugettext = gettext
-
+from uuid import uuid4
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -24,13 +26,48 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = '__all__'  # 或者指定您希望序列化的字段
 
+# 测试专用
+@csrf_exempt
+def create_user(request):
+    if request.method == 'POST':
+        json_data = json.loads(request.body)
+        username = json_data.get('username', None)
+        avatar = json_data.get('avatar', None)
+        # 创建用户
+        user = Users.objects.create(username=username, avatar=avatar)
+        return JsonResponse({'message': 'User created successfully', 'user_id': user.id})
+        # 返回用户信息
 
+@csrf_exempt
+def upload_image(request):
+    print("imhere", request.FILES)
+    if request.method == 'POST' and request.FILES.get('file'):
+        file= request.FILES['file']
+        # 处理上传的文件，保存到服务器上
+        _, ext = os.path.splitext(file.name)
+        new_name = f"{uuid4().hex}{ext}"
+
+        where = '%s/images/%s' % (settings.MEDIA_ROOT, new_name)
+        # 分块保存image
+        content = file.chunks()
+        with open(where, 'wb') as f:
+            for i in content:
+                f.write(i)
+        print(new_name)
+        return JsonResponse({'new_name': new_name, 'message': 'File uploaded successfully'},status=200)
+    else:
+        print('failed')
+        return JsonResponse({'message': 'Only POST requests with file uploads are allowed'}, status=405)
+
+
+@csrf_exempt
 def search_posts(request):
     if request.method == 'POST':
         json_data = json.loads(request.body)
+        print(json_data)
         content = json_data.get('content', None) 
         user_id = json_data.get('user_id', None)
-        # 搜索数据库中含有message的所有帖子
+        # 搜索数据库中含有content的所有帖子
         posts = Post.objects.filter(content__icontains=content)  # 大小写不敏感
         if posts.exists():
             posts = list(posts)
@@ -42,6 +79,8 @@ def search_posts(request):
                     star = Star.objects.filter(post_id=post['id'], user_id=user_id).exists()
                     post['upvoted'] = upvote
                     post['stared'] = star
+                is_user = True if user_id == post['user'] else False
+                post['is_user'] = is_user
                 image_urls = list(PostImages.objects.filter(post_id=post['id']).values_list('url', flat=True))
                 post['images'] = image_urls
                 post['num_comments'] = Comment.objects.filter(post_id=post['id']).count()
@@ -60,15 +99,16 @@ def search_posts(request):
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
+@csrf_exempt
 def get_one_post(request):
     if request.method == 'POST':
         try:
             json_data = json.loads(request.body)
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON data'}, status=400)
-        
+        print("json_data", json_data)
         id = json_data.get('id', None)
-        user_id = json_data.get('user_id', None)
+        print("id:", id)
         try:
             post = Post.objects.get(id=id)
         except Post.DoesNotExist:
@@ -77,14 +117,7 @@ def get_one_post(request):
         parent_comments = Comment.objects.filter(is_post_comment=True, post_id=post['id'])
 
         if parent_comments.exists():
-            parent_comments = list(parent_comments)
-            parent_comments = CommentSerializer(parent_comments, many=True).data
-            for comment in parent_comments:
-                if user_id is not None:
-                    upvote = UpvoteComment.objects.filter(comment_id=comment['id'], user_id=user_id).exists()
-                    comment['upvoted'] = upvote
-                comment['user_name'] = Users.objects.get(pk=comment['user']).username
-                comment['user_avatar'] = Users.objects.get(pk=comment['user']).avatar
+            parent_comments = [comment.id for comment in parent_comments]
         else :
             parent_comments = []
 
@@ -102,7 +135,7 @@ def get_one_post(request):
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
-
+@csrf_exempt
 def get_children_comments(request):
     if request.method == 'POST':
         try:
@@ -110,28 +143,30 @@ def get_children_comments(request):
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON data'}, status=400)
         # 处理JSON数据
-        parent_id = json_data.get('parent_id', None)  # 获取JSON数据中的特定字段值
-        post_id = json_data.get('post_id', None)  # 获取JSON数据中的特定字段值
+        id = json_data.get('id', None)  # 获取JSON数据中的特定字段值
         user_id = json_data.get('user_id', None)
-        parent_search = Comment.objects.get(id=parent_id)
-        post_search = Post.objects.get(id=post_id)
-        children_comments = Comment.objects.filter(is_post_comment=False, parent_comment=parent_search, post=post_search)
-        if children_comments.exists():
-            children_comments = list(children_comments)
-            children_comments = CommentSerializer(children_comments, many=True).data
-            for comment in children_comments:
-                if user_id is not None:
-                    upvote = UpvoteComment.objects.filter(comment_id=comment['id'], user_id=user_id).exists()
-                    comment['upvoted'] = upvote
-                comment['user_name'] = Users.objects.get(pk=comment['user']).username
-                comment['user_avatar'] = Users.objects.get(pk=comment['user']).avatar
+        print('id:',id)
+        comment_search = Comment.objects.get(id=id)
+        if comment_search is not None:
+            comment_search = CommentSerializer(comment_search).data
+            children_comments = Comment.objects.filter(parent_comment_id=comment_search['id'])
+            if children_comments.exists():
+                children_comments = [comment.id for comment in children_comments]
+            else:
+                children_comments = []
+            comment_search['children_ids'] = children_comments
+            if user_id is not None:
+                upvote = UpvoteComment.objects.filter(comment_id=comment_search['id'], user_id=user_id).exists()
+                comment_search['upvoted'] = upvote
+            comment_search['user_name'] = Users.objects.get(pk=comment_search['user']).username
+            comment_search['user_avatar'] = Users.objects.get(pk=comment_search['user']).avatar
         else:
-            children_comments = []
+            return JsonResponse({'message': 'Comment not found'}, status=404)
        
         # 构造返回结果
         response_data = {
             'message': 'Success',
-            'children_comments': children_comments
+            'comments': comment_search
         }
         print('response_data_comments: ',response_data)
         return JsonResponse(response_data, status=200)
@@ -140,6 +175,7 @@ def get_children_comments(request):
 
 # @authentication_classes([JSONWebTokenAuthentication])
 # @permission_classes([])
+@csrf_exempt
 def create_post(request):
     if request.method == 'POST':
         try:
@@ -172,6 +208,7 @@ def create_post(request):
 
 # @authentication_classes([JSONWebTokenAuthentication])
 # @permission_classes([])
+@csrf_exempt
 def delete_post(request):
     if request.method == 'DELETE':
         try:
@@ -194,6 +231,7 @@ def delete_post(request):
 
 
 # @authentication_classes([JSONWebTokenAuthentication])
+@csrf_exempt
 def comment_post(request):
     if request.method == 'POST':
         # 检查请求体中的JSON数据
@@ -236,6 +274,7 @@ def comment_post(request):
         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
 # @authentication_classes([JSONWebTokenAuthentication])
+@csrf_exempt
 def reply_comment(request):
     if request.method == 'POST':
         # 检查请求体中的JSON数据
@@ -248,7 +287,6 @@ def reply_comment(request):
         parent_comment_id = json_data.get('parent_comment_id')
         user_id = json_data.get('user_id')
         content = json_data.get('content')
-        ip = json_data.get('ip')
 
         if not parent_comment_id or not user_id or not content:
             return JsonResponse({'message': 'parent_comment_id, user_id, and content are required'}, status=400)
@@ -261,8 +299,7 @@ def reply_comment(request):
             user_id=user_id,
             content=content,
             is_post_comment=False,
-            post_id=parent_comment.post,
-            ip=ip
+            post_id=parent_comment.post_id,
         )
         user = Users.objects.get(id=user_id)
         # 构造评论的信息
@@ -286,6 +323,7 @@ def reply_comment(request):
         return JsonResponse({'message': 'Method not allowed'}, status=405)
     
 # @authentication_classes([JSONWebTokenAuthentication])
+@csrf_exempt
 def change_post_reaction(request):
     if request.method == 'PUT':
         # 解析请求体中的JSON数据
@@ -315,7 +353,7 @@ def change_post_reaction(request):
             post = Post.objects.get(id=post_id)
         except Post.DoesNotExist:
             return JsonResponse({'message': 'Post not found'}, status=404)
-
+        print(json_data)
         # 更新帖子统计信息
         if field == 'num_upvotes':
             if change:
@@ -358,6 +396,7 @@ def change_post_reaction(request):
         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
 # @authentication_classes([JSONWebTokenAuthentication])
+@csrf_exempt
 def delete_comment(request):
     if request.method == 'DELETE':
         # 获取查询参数
@@ -382,6 +421,7 @@ def delete_comment(request):
         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
 # @authentication_classes([JSONWebTokenAuthentication])
+@csrf_exempt
 def change_comment_reaction(request):
     if request.method == 'PUT':
         try:

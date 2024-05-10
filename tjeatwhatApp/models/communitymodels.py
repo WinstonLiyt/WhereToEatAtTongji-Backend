@@ -18,7 +18,6 @@ class Comment(models.Model):
     parent_comment = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    ip = models.CharField(max_length=50)
     content = models.TextField()
     num_upvotes = models.IntegerField(default=0)
     time = models.DateTimeField(auto_now_add=True)

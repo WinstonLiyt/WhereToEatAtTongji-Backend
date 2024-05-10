@@ -88,9 +88,9 @@ WSGI_APPLICATION = 'tjeatwhat.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'TJWhatToEat',
+        'NAME': 'TJEatWhat',
         'USER': 'root',
-        'PASSWORD': '12345678',
+        'PASSWORD': '2024',
         'HOST': 'localhost',
         'PORT': '3306',
 
@@ -137,9 +137,12 @@ STATIC_URL = 'static/'
 
 
 # 图片地址
-MEDIA_URL = '/media/images/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'static/media'
 
+#头像图片地址
+# AVATAR_URL = '/avatar/'
+# AVATAR_ROOT = BASE_DIR / 'static/avatar'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

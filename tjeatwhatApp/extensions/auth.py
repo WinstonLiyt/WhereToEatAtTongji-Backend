@@ -15,7 +15,8 @@ class JwtQueryParamsAuthentication(BaseAuthentication):
         # 获取token并判断token的合法性
         # 打印请求头
         # print("header:",request.headers)
-        token = request.headers.get('Authorization')
+        token = request.headers.get('Token')
+
         if not token:
             print("token不存在  ")
             raise AuthenticationFailed({'code': 1003, 'error': 'token未提供'})

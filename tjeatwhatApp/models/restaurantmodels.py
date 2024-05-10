@@ -2,19 +2,32 @@ from django.db import models
 from rest_framework import serializers
 
 
+
+
 class RestTag(models.Model):
+    TAG_TYPE = (
+        (1, '面食'),
+        (2,'甜点'),
+        (3,'饮品'),
+        (4,'早品'),
+        (5,'水果'),
+        (6,'烧烤'),
+        (7,'西餐'),
+        (8,'炒菜'),
+    )
     id=models.AutoField(primary_key=True)
-    name=models.CharField(max_length=32,unique=True)#标签名
+    name=models.CharField(max_length=32,unique=True,choices=TAG_TYPE)#标签名
 
 class RestImage(models.Model):
     id=models.AutoField(primary_key=True)
-    image = models.ImageField(upload_to='images', max_length=100, blank=True, null=True)
+    image = models.ImageField(upload_to='images', max_length=100, blank=True, null=True,default='images/test.jpg')
 
 
 class Restaurant(models.Model):
     id=models.AutoField(primary_key=True)
     name=models.CharField(max_length=32)#店名
     location=models.CharField(max_length=32)#地址
+    time=models.CharField(max_length=32,null=True)#营业时间
     phone_number=models.CharField(max_length=11)#电话号码
     description=models.CharField(max_length=150,null=True)#店铺描述
     owner=models.ForeignKey('User',on_delete=models.CASCADE,default=None)
@@ -22,18 +35,19 @@ class Restaurant(models.Model):
     tags=models.ManyToManyField('RestTag')
 
     def update_images(self, new_images):
-        old_images = list(self.images.all())  # 获取当前餐厅的所有旧图片
-         # 清空当前餐厅的所有图片联系
-        self.images.clear()
-        # 添加新的图片
-        for image in new_images:
-            rest_image, created = RestImage.objects.get_or_create(image=image)
-            self.images.add(rest_image)
+        # 获取当前餐厅的所有旧图片
+        old_images = list(self.images.all())
         
+        # 更新图片集合
+        new_rest_images = [RestImage.objects.get_or_create(image=image)[0] for image in new_images]
+        self.images.set(new_rest_images)
+
         # 删除不再被使用的旧图片对应的RestImage对象
         for old_image in old_images:
-            if old_image not in self.images.all():
+            # 检查旧图片是否还被其他餐厅使用
+            if old_image.restaurant_set.count() == 0:
                 old_image.delete()
+
   
 
 
@@ -56,7 +70,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
     images = RestImageSerializer(many=True, read_only=True)
     class Meta:
         model = Restaurant
-        fields = ['id', 'name', 'location', 'phone_number', 'description', 'images','tags']
+        fields = ['id', 'name', 'time','location', 'phone_number', 'description', 'images','tags']
 
 
 

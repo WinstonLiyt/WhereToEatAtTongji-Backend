@@ -3,10 +3,9 @@ from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 import json
 from ..models.restaurantmodels import Restaurant,RestaurantSerializer
-from ..models.dishmodels import  Dish,DishTag,DishSerializer,DishEval,DishEvalSerializer
+from ..models.dishmodels import  Dish,DishSerializer,DishEval,DishEvalSerializer
 from django.db.models import Avg
 from ..models.usermodels import User
-import jieba 
 from ..apps import TjeatwhatappConfig
 from rest_framework.response import Response
 
@@ -23,16 +22,6 @@ def create_dish(request,rest_id):
     if request.method == 'POST':
         # 获取请求体中的数据
         data = json.loads(request.body)
-        if 'tags' in data and isinstance(data['tags'], list):
-            # 如果 JSON 数据中包含 'tags' 键且其值是一个数组
-            tag_names = data['tags']
-            tags = []
-            # 检查标签是否已存在，不存在则创建新标签
-            for tag_name in tag_names:
-                tag, created = DishTag.objects.get_or_create(name=tag_name)
-                tags.append(tag)
-        else:
-            return JsonResponse({'error': 'Invalid JSON data format'}, status=400)
        
         name = data.get('name', '')
         description = data.get('description', '')
@@ -48,13 +37,12 @@ def create_dish(request,rest_id):
             restaurant=rest,
         )
 
-        new_dish.tags.set(tags)
 
 
         # 构造返回的 JSON 数据
         response_data = {
             'id': new_dish.id,
-            'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'time': datetime.now().date().strftime('%Y-%m-%d %H:%M:%S'),
             'message': 'Restaurant created successfully',
         }
         
@@ -75,17 +63,7 @@ def update_dish(request,dish_id):
     if request.method == 'PUT':
         data = json.loads(request.body)
      
-        if 'tags' in data:
-            tag_names = data['tags']
-            tags = []
-            for tag_name in tag_names:
-                tag, created = DishTag.objects.get_or_create(name=tag_name)
-                tags.append(tag)
-            dish.tags.set(tags)  # 设置菜品的标签关联
-        # 如果标签数据为空，保留原有的标签关联
-        elif 'tags' not in data and dish.tags.exists():
-            pass
-
+        
         dish.name = data.get('name', dish.name)
         dish.description = data.get('description', dish.description)
         dish.price = float(data.get('price', dish.price))
@@ -137,17 +115,9 @@ def get_dish(request,dish_id):
             dish = Dish.objects.get(pk=dish_id)
          except Dish.DoesNotExist:
             return JsonResponse({'error': 'Dish not found'}, status=404)
-         response_data={
-             'id':dish.id,
-             'name':dish.name,
-             'description':dish.description,
-             'tags':dish.tags,
-             'image':dish.image, 
-             'price':dish.price,
-            'restaurant':dish.resaurant,
-         }
+         response = DishSerializer(dish)
          
-         return JsonResponse(response_data,status=200)
+         return JsonResponse(response.data,status=200)
     else:
         return JsonResponse({'message': 'Only GET requests are allowed'}, status=405)
     
@@ -185,12 +155,14 @@ def create_dish_eval(request,user_id,dish_id):
         dish = Dish.objects.get(pk=dish_id)
     except Dish.DoesNotExist:
         return JsonResponse({'error': 'Dish not found'}, status=404)
-    
+
     if request.method == 'POST':
         # 获取请求体中的数据
         data = json.loads(request.body)
         score = data.get('score', '')
         comment = data.get('comment', '')
+        user.credits+=5
+        user.save()
 
         # 创建新的店铺记录
         new_dish_eval = DishEval.objects.create(
@@ -198,13 +170,13 @@ def create_dish_eval(request,user_id,dish_id):
             comment=comment,
             dish=dish,
             user=user,
-            time=datetime.now(),
+            time=datetime.now().date().strftime('%Y-%m-%d'),
         )
 
         # 构造返回的 JSON 数据
         response_data = {
             'id': new_dish_eval.id,
-            'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'time': datetime.now().date().strftime('%Y-%m-%d'),
             'message': 'DishEval created successfully',
         }
         
@@ -238,12 +210,12 @@ def search(request,name):
         return set(list_char)&set(list(str))
     if request.method == 'GET':
         try:
-            sim=TjeatwhatappConfig.model.most_similar(name, topn=10)
-            sims=[jieba.lcut(i[0]) for i in sim] #二维列表
-            simss=set(item for sublist in sims for item in sublist)
-            print(simss)
-            expanded_words = list(set(name).union(simss))
-            # expanded_words =jieba.lcut(name)
+            # sim=TjeatwhatappConfig.model.most_similar(name, topn=10)
+            # sims=[jieba.lcut(i[0]) for i in sim] #二维列表
+            # simss=set(item for sublist in sims for item in sublist)
+            # print(simss)
+            # expanded_words = list(set(name).union(simss))
+            expanded_words =name
             all_restaurants = Restaurant.objects.all()
             all_dishes=Dish.objects.all()
 

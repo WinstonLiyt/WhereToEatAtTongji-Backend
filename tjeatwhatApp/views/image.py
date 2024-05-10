@@ -16,9 +16,9 @@ def upload_file(request):
         file= request.FILES['file']
         # 处理上传的文件，保存到服务器上
         _, ext = os.path.splitext(file.name)
-        new_name = f"{uuid4().hex}{ext}"
+        new_name = f"images/{uuid4().hex}{ext}"
 
-        where = '%s/images/%s' % (settings.MEDIA_ROOT, new_name)
+        where = '%s/%s' % (settings.MEDIA_ROOT, new_name)
         # 分块保存image
         content = file.chunks()
         with open(where, 'wb') as f:

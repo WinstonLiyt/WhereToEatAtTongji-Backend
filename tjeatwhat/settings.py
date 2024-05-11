@@ -93,7 +93,6 @@ DATABASES = {
         'PASSWORD': '2024',
         'HOST': 'localhost',
         'PORT': '3306',
-
     }
 }
 
@@ -148,4 +147,3 @@ MEDIA_ROOT = BASE_DIR / 'static/media'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-

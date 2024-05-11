@@ -1,7 +1,6 @@
 from django.urls import path
 from . import views
 
-
 urlpatterns = [
     path('restaurant/<int:user_id>/create/', views.create_restaurant,name="create_restaurant"),
     path('restaurant/<int:rest_id>/update/',  views.update_restaurant,name="update_restaurant"),
@@ -37,6 +36,19 @@ urlpatterns = [
 
     path('recommend/getAllStore', views.get_all_store, name='get_all_store'),
     path('recommend/getAllDishesByStoreID/', views.get_all_dish_by_store_id, name='getAllDishesByStoreID'),
-    path('recommend/getPersonalDish', views.get_dish_by_user_interest, name='get_dish_by_user_interest')
-]
+    path('recommend/getPersonalDish', views.get_dish_by_user_interest, name='get_dish_by_user_interest'),
 
+    # gaq
+    path('posts/search/', views.search_posts, name='search_posts'),
+    path('posts/create/', views.create_post, name='create_post'),
+    path('posts/delete/', views.delete_post, name='delete_post'),
+    path('posts/comment/', views.comment_post, name='comment_post'),
+    path('posts/details/', views.get_one_post, name='get_one_post'),
+    path('posts/getcomments/', views.get_one_comment, name='get_one_comment'),
+    path('posts/reply_comment/', views.reply_comment, name='reply_comment'),
+    path('posts/change_post_reaction/', views.change_post_reaction, name='change_reaction'),
+    path('posts/delete_comment/', views.delete_comment, name='delete_comment'),
+    path('posts/change_comment_reaction/', views.change_comment_reaction, name='delete_reply'),
+    # path('uploads/', views.upload_image, name='upload_image'),
+    # path('create/', views.create_user, name='create_user'),
+]

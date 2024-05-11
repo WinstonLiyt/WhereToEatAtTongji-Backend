@@ -87,7 +87,7 @@ def search_posts(request):
                 post['user_name'] = Users.objects.get(pk=post['user']).username
                 post['user_avatar'] = Users.objects.get(pk=post['user']).avatar
         else:
-            posts = []
+            serialized_posts = []
         # 将查询结果序列化为JSON格式
         # 构造返回结果
         response_data = {
@@ -136,7 +136,7 @@ def get_one_post(request):
         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
 @csrf_exempt
-def get_children_comments(request):
+def get_one_comment(request):
     if request.method == 'POST':
         try:
             json_data = json.loads(request.body)
@@ -160,6 +160,7 @@ def get_children_comments(request):
                 comment_search['upvoted'] = upvote
             comment_search['user_name'] = Users.objects.get(pk=comment_search['user']).username
             comment_search['user_avatar'] = Users.objects.get(pk=comment_search['user']).avatar
+            comment_search['is_user'] = comment_search['user'] == user_id
         else:
             return JsonResponse({'message': 'Comment not found'}, status=404)
        
@@ -427,14 +428,16 @@ def change_comment_reaction(request):
         try:
             json_data = json.loads(request.body)
         except json.JSONDecodeError:
+            print('Invalid JSON data')
             return JsonResponse({'message': 'Invalid JSON data'}, status=400)
-        
+        print(json_data)
         change = json_data.get('change')
         user_id = json_data.get('user_id')
         comment_id = json_data.get('comment_id')
 
         # 检查必需的参数
         if comment_id is None or change is None :
+            print('comment_id or change is required')
             return JsonResponse({'message': 'comment_id or change is required'}, status=400)
       
         # 这里添加对用户权限的检查，确定用户是否有权限执行操作

@@ -1,4 +1,3 @@
-from django.test import TestCase, Client
 from rest_framework.test import APIClient
 from .models.usermodels import User
 from .models.restaurantmodels import Restaurant,RestImage,RestTag
@@ -384,3 +383,4 @@ class UserTestCase(TestCase):
 #         self.assertEqual(response.data, '成功获取信息')
 #         print('\n')
 
+>>>>>>> 8b8c7ce17a03d25a04999c96466b81bf704e1ee0

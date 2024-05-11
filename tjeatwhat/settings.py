@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +27,7 @@ SECRET_KEY = 'django-insecure-g7p(6ctcbk-@8#!-5p2$e+!_sef79vo(dr_r*mm6qtjwixuxqb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -37,8 +39,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'tjeatwhatApp',
+    'tjeatwhatApp.apps.TjeatwhatappConfig',
+    'rest_framework',
+    #'tjeatwhatApp',
 ]
+
+# 微信小程序 AppID 和 AppSecret
+WX_APP_ID = 'wxb936af7f873567cb'
+WX_APP_SECRET = '3282e45160d1ddea5ce443440f4c1168'
+
+#指定用户模块
+# AUTH_USER_MODEL = 'tjeatwhatApp.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -77,9 +88,9 @@ WSGI_APPLICATION = 'tjeatwhat.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'tjwhattoeat',
+        'NAME': 'TJEatWhat',
         'USER': 'root',
-        'PASSWORD': 'GUOanqi0908',
+        'PASSWORD': '2024',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -108,13 +119,14 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
+# LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-hans'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -122,10 +134,22 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+
+# 图片地址
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'static/media'
+
+#头像图片地址
+# AVATAR_URL = '/avatar/'
+# AVATAR_ROOT = BASE_DIR / 'static/avatar'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+<<<<<<< HEAD
 CSRF_TRUSTED_ORIGINS = ['http://localhost/']
 
+=======
+>>>>>>> 8b8c7ce17a03d25a04999c96466b81bf704e1ee0

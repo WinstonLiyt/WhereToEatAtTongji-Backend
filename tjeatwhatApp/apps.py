@@ -6,8 +6,8 @@ class TjeatwhatappConfig(AppConfig):
     name = 'tjeatwhatApp'
     file='/root/tencent-ailab-embedding-zh-d100-v0.2.0-s/tencent-ailab-embedding-zh-d100-v0.2.0-s.txt'
 
-    #file='/Users/ruoxizang/desktop/SE/tencent-ailab-embedding-zh-d100-v0.2.0-s.txt'
-    model = KeyedVectors.load_word2vec_format(file, binary=False)
+    #file='/Users/ruoxizang/desktop/SE/tencent-ailab-embedding-zh-d100-v0.2.0-s.t
+    # model = KeyedVectors.load_word2vec_format(file, binary=False)
 
     def ready(self):
         import tjeatwhatApp.signals  # 导入信号接收器

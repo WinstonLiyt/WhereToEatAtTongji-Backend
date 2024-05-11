@@ -20,13 +20,7 @@ class User(models.Model):
         (3,'黄牌')
     )
 
-    # username = models.CharField('用户名', max_length=150, unique=True)
-    # phone = models.CharField('电话', max_length=20, blank=True, null=True)
-    # email = models.EmailField('邮箱', unique=True)
-    # password = models.CharField('密码', max_length=128)
-    # 微信账号相关信息
     openid = models.CharField('微信openid', max_length=100, unique=True)
-    # unionid = models.CharField('微信unionid', max_length=100, unique=True, blank=True, null=True)
     nickname = models.CharField('微信昵称', max_length=100, blank=True, null=True)
     avatar_url = models.URLField('微信头像', blank=True, null=True)
     signature = models.CharField('个性签名', max_length=100, blank=True, null=True)
@@ -34,18 +28,7 @@ class User(models.Model):
     credits = models.IntegerField('经验值', default=0)
     token = models.IntegerField('牌子', choices=TOKEN_TYPE, default=2)
     
-    # 用自定义的用户需要重写此方法
-    # def create_username_password(self):
-    #     if not self.username and not self.password and self.openid:
-    #         key = settings.SECRET_KEY
-    #         self.username = hashlib.pbkdf2_hmac(
-    #             "sha256", getattr(self, 'openid').encode(encoding='utf-8'), key.encode(encoding='utf-8'), 10).hex()
-    #         self.password = hashlib.pbkdf2_hmac(
-    #             "sha256", self.username.encode(), getattr(self, 'openid').encode(encoding='utf-8'), 10).hex()
-
-    # def save(self, *args, **kwargs):
-    #     self.create_username_password()
-    #     super().save(*args, **kwargs)
+    
 
 
 class UserSerializer(serializers.ModelSerializer):

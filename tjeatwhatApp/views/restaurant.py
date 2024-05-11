@@ -9,11 +9,13 @@ import json
 from ..models.restaurantmodels import Restaurant,RestaurantSerializer,RestImage,RestTag
 from ..models.dishmodels import Dish,DishEval
 from ..models.usermodels import User,UserSerializer
-
+from tjeatwhatApp.extensions.auth import JwtQueryParamsAuthentication
+from rest_framework.decorators import  authentication_classes
 '''店铺的增删改部分'''
 
 
-@csrf_exempt  #正式上线时去掉
+# @authentication_classes([JwtQueryParamsAuthentication])
+@csrf_exempt
 def create_restaurant(request,user_id):
     try:
         user = User.objects.get(pk=user_id)
@@ -78,7 +80,8 @@ def create_restaurant(request,user_id):
 
 
 
-@csrf_exempt 
+#@authentication_classes([JwtQueryParamsAuthentication]) 
+@csrf_exempt
 def update_restaurant(request,rest_id):
     try:
         rest = Restaurant.objects.get(pk=rest_id)
@@ -118,7 +121,8 @@ def update_restaurant(request,rest_id):
 
 
 
-@csrf_exempt 
+# @authentication_classes([JwtQueryParamsAuthentication]) 
+@csrf_exempt
 def delete_restaurant(request,rest_id):
     try:
         rest = Restaurant.objects.get(pk=rest_id)

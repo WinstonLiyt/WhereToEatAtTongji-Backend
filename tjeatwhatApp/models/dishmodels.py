@@ -13,13 +13,13 @@ class Dish(models.Model):
     image = models.ImageField(upload_to='images', max_length=100, blank=True, null=True)  
     price=models.DecimalField(max_digits=5,decimal_places=2)
     restaurant = models.ForeignKey("Restaurant", on_delete=models.CASCADE)
-    def save(self, *args, **kwargs):
-        # 删除旧图片
-        if self.pk and self.image:
-            old_dish = Dish.objects.get(pk=self.pk)
-            if old_dish.image:
-                old_dish.image.delete(False)  # 删除旧图片文件
-        super().save(*args, **kwargs)
+    def update_image(self, new_image):
+        # 获取当前餐厅的所有旧图片
+        old_image = self.image
+        if new_image != old_image:
+            old_image.delete()
+        self.image.set(new_image)
+                
 
 
 

@@ -8,7 +8,7 @@ from django.db.models import Avg
 from ..models.usermodels import User
 from ..apps import TjeatwhatappConfig
 from rest_framework.response import Response
-
+import requests
 
 '''菜品的增删改'''
 
@@ -67,7 +67,7 @@ def update_dish(request,dish_id):
         dish.name = data.get('name', dish.name)
         dish.description = data.get('description', dish.description)
         dish.price = float(data.get('price', dish.price))
-        dish.image=data.get('image',dish.image)
+        dish.update(data.get('image',dish.image))
         dish.save()
         return JsonResponse({'message': 'Dish updated successfully'},status=200)
     else:
@@ -137,6 +137,7 @@ def get_dish_eval(request,dish_id):
     
     if request.method == 'GET':
          avg_score = DishEval.objects.filter(dish=dish).aggregate(avg_value=Avg('score'))['avg_value']
+         avg_score=round(avg_score,1)
          dish_evals = DishEval.objects.filter(dish=dish)
          response = DishEvalSerializer(dish_evals, many=True)
          return JsonResponse({'avg_score':avg_score,'data':response.data},status=200)
@@ -215,7 +216,16 @@ def search(request,name):
             # simss=set(item for sublist in sims for item in sublist)
             # print(simss)
             # expanded_words = list(set(name).union(simss))
-            expanded_words =name
+
+            url = 'http://localhost:5000/model/'
+
+            # 发送 GET 请求并获取响应
+
+            response = requests.get(url, params={'name': name})
+            
+            sims =response.json()['sim']
+            expanded_words=[i[0] for i in sims]+list(name)
+
             all_restaurants = Restaurant.objects.all()
             all_dishes=Dish.objects.all()
 

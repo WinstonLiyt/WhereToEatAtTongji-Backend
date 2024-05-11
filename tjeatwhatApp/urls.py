@@ -33,6 +33,7 @@ urlpatterns = [
     path('user/avatar', views.set_avatar, name='set_avatar'),
     path('user/getInfo',views.get_user_info,name='get_user_info'),
     path('user/uploadAvatar',views.upload_avatar,name='upload_avatar'),
+    path('user/getId',views.get_user_id,name='get_user_id'),
 
     path('recommend/getAllStore', views.get_all_store, name='get_all_store'),
     path('recommend/getAllDishesByStoreID/', views.get_all_dish_by_store_id, name='getAllDishesByStoreID'),

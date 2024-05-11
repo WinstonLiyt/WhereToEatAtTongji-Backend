@@ -16,6 +16,7 @@ def upload_file(request):
         file= request.FILES['file']
         # 处理上传的文件，保存到服务器上
         _, ext = os.path.splitext(file.name)
+
         new_name = f"images/{uuid4().hex}{ext}"
 
         where = '%s/%s' % (settings.MEDIA_ROOT, new_name)

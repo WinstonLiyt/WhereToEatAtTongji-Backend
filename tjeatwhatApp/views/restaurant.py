@@ -24,6 +24,7 @@ def create_restaurant(request,user_id):
         data = json.loads(request.body)
         # 解析请求体中的数据
         name = data.get('name', '')
+        time=data.get('time','')
         location = data.get('location', '')
         description = data.get('description', '')
        
@@ -54,6 +55,7 @@ def create_restaurant(request,user_id):
         new_restauant = Restaurant.objects.create(
             name=name,
             location=location,
+            time=time,
             description=description,
             phone_number=phone_number,
             owner=user
@@ -87,6 +89,7 @@ def update_restaurant(request,rest_id):
         data = json.loads(request.body)
         #data.get如果键不存在，则返回rest.name，即默认使用当前店铺对象的名称作为值,这样就可以前端没传也可以不篡改数据
         rest.name = data.get('name', rest.name)
+        rest.time=data.get('time',rest.time)
         rest.location = data.get('location', rest.location)
         rest.description = data.get('description', rest.description)
         rest.phone_number = data.get('phone_number', rest.phone_number)

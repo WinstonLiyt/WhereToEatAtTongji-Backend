@@ -30,10 +30,18 @@ def get_all_store(request):
 #随机推荐——根据餐厅id获取所有菜品getAllDish
 @api_view(['GET'])
 @authentication_classes([JwtQueryParamsAuthentication])
-def get_all_dish_by_store_id(request, store_id):
-    # 从数据库中获取相应 store_id 的所有菜品
-    dishes = dishmodels.Dish.objects.filter(restaurant_id=store_id)
+def get_all_dish_by_store_id(request):
     
+    # 获取查询参数中的 store_id
+    store_id = request.GET.get('store_id')
+    print("store_id=",store_id)
+    dishes = dishmodels.Dish.objects.filter(restaurant_id=store_id)
+    # 从数据库中获取相应 store_id 的所有菜品
+    # restaurant=restaurantmodels.Restaurant.objects.filter(id=store_id)
+    # print("resturant_id=",restaurant.id)
+    # 假设 restaurant 是一个 Restaurant 对象
+    # dishes = dishmodels.Dish.objects.filter(restaurant__id=restaurant.id)
+    # print("dishes:",dishes)
     # 构造响应数据
     dish_list = []
     for dish in dishes:
@@ -94,7 +102,7 @@ def get_dish_by_user_interest(request):
     # 如果找到了菜品，则构造响应数据
     if recommend_dish:
         # 获取菜品的标签
-        tags = [tag.name for tag in recommend_dish.tags.all()]
+        # tags = [tag.name for tag in recommend_dish.tags.all()]
 
         # 获取菜品所属店家的信息
         restaurant_name = recommend_dish.restaurant.name
@@ -103,7 +111,7 @@ def get_dish_by_user_interest(request):
         dish_data = {
             'id': recommend_dish.id,
             'name': recommend_dish.name,
-            'tags': tags,
+            # 'tags': tags,
             'store_name': restaurant_name,
             'description': dish_description,
             'img_url': '**/**',

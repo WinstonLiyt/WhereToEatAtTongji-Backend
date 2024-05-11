@@ -4,7 +4,7 @@ import datetime
 from django.conf import settings
 
 # 需要传入
-def create_token(payload, timeout=1):
+def create_token(payload, timeout=100):
     salt = settings.SECRET_KEY
 
     # 构造header

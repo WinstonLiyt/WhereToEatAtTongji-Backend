@@ -13,7 +13,7 @@ urlpatterns = [
     path('dish/<int:dish_id>/eval/',views.get_dish_eval,name='get_dish_eval'),
     path('dish/<int:dish_id>/',views.get_dish,name='get_dish'),
     path('restaurant/all/',views.get_all_rest,name='get_all_rest'),
-    path('restaurant/<int:rest_id>/all_dish',views.get_all_dish,name='get_all_dish'),
+    path('restaurant/<int:rest_id>/all_dish/',views.get_all_dish,name='get_all_dish'),
     path('eval/<int:eval_id>/reply/',views.reply,name='reply'),
     path('eval/<int:user_id>/<int:dish_id>/create/',views.create_dish_eval,name='create_dish_eval'),
     path('eval/<int:eval_id>/delete/',views.delete_dish_eval,name='delete_dish_eval'),
@@ -23,15 +23,19 @@ urlpatterns = [
 
     
     #zrx
-    path('user/login/', views.login, name='login'),
-    path('user/studentRegister/', views.student_register, name='student_register'),
-    path('user/storeRegister/',views.store_register, name='store_register'),
-    path('user/test_token/', views.test_token_view, name='TestTokenView'),
-    path('user/setName/', views.set_name, name='set_name'),
-    path('user/avatar/', views.set_avatar, name='set_avatar'),
-    
-    path('recomend/getAllStore/', views.get_all_store, name='get_all_store'),
-    path('recomend/getAllDishByStoreID/<int:store_id>/', views.get_all_dish_by_store_id, name='getAllDishByStoreID'),
-    path('recomend/getPersonalDish', views.get_dish_by_user_interest, name='get_dish_by_user_interest')
+    path('user/login', views.login, name='login'),
+    path('user/studentRegister', views.student_register, name='student_register'),
+    path('user/storeRegister',views.store_register, name='store_register'),
+    path('user/test_token', views.test_token_view, name='TestTokenView'),
+    path('user/setName', views.set_name, name='set_name'),
+    path('user/setSignature', views.set_signature, name='set_signature'),
+
+    path('user/avatar', views.set_avatar, name='set_avatar'),
+    path('user/getInfo',views.get_user_info,name='get_user_info'),
+    path('user/uploadAvatar',views.upload_avatar,name='upload_avatar'),
+
+    path('recommend/getAllStore', views.get_all_store, name='get_all_store'),
+    path('recommend/getAllDishesByStoreID/', views.get_all_dish_by_store_id, name='getAllDishesByStoreID'),
+    path('recommend/getPersonalDish', views.get_dish_by_user_interest, name='get_dish_by_user_interest')
 ]
 

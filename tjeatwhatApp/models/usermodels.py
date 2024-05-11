@@ -32,7 +32,7 @@ class User(models.Model):
     signature = models.CharField('个性签名', max_length=100, blank=True, null=True)
     type = models.IntegerField('用户类型', choices=USER_TYPE, default=1)
     credits = models.IntegerField('经验值', default=0)
-    token = models.IntegerField('牌子', choices=TOKEN_TYPE, default=1)
+    token = models.IntegerField('牌子', choices=TOKEN_TYPE, default=2)
     
     # 用自定义的用户需要重写此方法
     # def create_username_password(self):

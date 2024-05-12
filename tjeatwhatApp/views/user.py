@@ -12,6 +12,9 @@ from uuid import uuid4
 import urllib.request
 import os
 
+
+
+
 @api_view(['GET'])
 @authentication_classes([JwtQueryParamsAuthentication])
 def get_user_id(request,*args,**kwargs):
@@ -51,8 +54,8 @@ def upload_avatar(request,*args,**kwargs):
         with open(where, 'wb') as f:
             for i in content:
                 f.write(i)
-    
-        return Response({'new_name':new_name,'message': 'File uploaded successfully'},status=200)
+        
+        return Response({'newname':new_name,'message': 'File uploaded successfully'},status=200)
     else:
         return Response({'error': '只能上传图片文件'}, status=405)
 
@@ -139,6 +142,9 @@ def store_register(request,*args,**kwargs):
     location = request.data.get('location')
     phone = request.data.get('phone')
     avatar_url = request.data.get('avatar_url')
+
+    rest_image=restaurantmodels.RestImage.objects.create(image="images/default_image.jpg")
+    
     
     if not avatar_url:
         avatar_url="default.jpg"
@@ -160,7 +166,7 @@ def store_register(request,*args,**kwargs):
                     openid=openid,
                     nickname=name,
                     type=2,
-                    avatar_url=avatar_url
+                    avatar_url=avatar_url,
                     # 根据需要设置其他字段
                 )
                 restaurant = restaurantmodels.Restaurant.objects.create(
@@ -169,12 +175,33 @@ def store_register(request,*args,**kwargs):
                     phone_number=phone,
                     owner=user
                 )
+                restaurant.images.set([rest_image])
+                restaurant.save()
+
                 # 生成 JWT token，并返回用户对象和 token
                 token = create_token({'id': user.id,'openid': user.openid})
                 return Response({ 'token': token}, status=200)
     
     # 如果没有成功注册用户，返回错误响应
     return Response({'error': '注册商家身份失败'}, status=400)
+
+##设置个人信息
+@api_view(['POST'])
+@authentication_classes([JwtQueryParamsAuthentication])
+def set_user_info(request,*args,**kwargs):
+    nickname = request.data.get('nickname')
+    signature = request.data.get('signature')
+    avatar_url = request.data.get('avatar_url')
+    user_id = request.user.get('id')
+    if nickname and avatar_url :
+        user = usermodels.User.objects.get(id=user_id)
+        # if signature:
+        user.signature=signature
+        user.nickname = nickname
+        user.avatar_url = avatar_url
+        user.save()
+        return Response({'msg': '成功修改信息'}, status=200)
+    return Response({'error': '关键字段缺失'}, status=400)
 
 ##`设置签名`
 @api_view(['POST'])
@@ -216,6 +243,7 @@ def set_name(request,*args,**kwargs):
 @api_view(['POST'])
 @authentication_classes([JwtQueryParamsAuthentication])
 def set_avatar(request,*args,**kwargs):
+    print("request.data:",request.data)
     avatar_url = request.data.get('avatar_url')
     user_id = request.user.get('id')
 

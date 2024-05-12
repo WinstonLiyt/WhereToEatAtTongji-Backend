@@ -10,11 +10,12 @@ from uuid import uuid4
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from tjeatwhatApp.extensions.auth import JwtQueryParamsAuthentication
-from rest_framework.decorators import authentication_classes, permission_classes
+from tjeatwhatApp.extensions.auth import JwtQueryParamsAuthentication,EmptyParamsAuthentication
+# from rest_framework.decorators import authentication_classes, permission_classes
 from ..models.communitymodels import Post, Comment, PostImages, Upvote, Star, UpvoteComment
 from ..models.usermodels import User
 from rest_framework import serializers
+from rest_framework.decorators import api_view, authentication_classes
 
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,7 +28,6 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = '__all__'  # 或者指定您希望序列化的字段
 
 # 测试专用
-@csrf_exempt
 # def create_user(request):
 #     if request.method == 'POST':
 #         json_data = json.loads(request.body)
@@ -59,14 +59,21 @@ class CommentSerializer(serializers.ModelSerializer):
 #         print('failed')
 #         return JsonResponse({'message': 'Only POST requests with file uploads are allowed'}, status=405)
 
+@api_view(['POST'])
+@authentication_classes([EmptyParamsAuthentication])
 
-@csrf_exempt
 def search_posts(request):
     if request.method == 'POST':
         json_data = json.loads(request.body)
         print(json_data)
         content = json_data.get('content', None) 
-        user_id = request.user.get('id')
+        user_id = None
+        print('user:', request.user, type(request.user))
+        if request.user['id'] is not None:
+            user_id = request.user['id']
+        else:
+            user_id = None
+    
         # 搜索数据库中含有content的所有帖子
         posts = Post.objects.filter(content__icontains=content)  # 大小写不敏感
         if posts.exists():
@@ -92,14 +99,14 @@ def search_posts(request):
         # 构造返回结果
         response_data = {
             'message': 'Success',
-            'posts': serialized_posts
+            'posts': list(reversed(serialized_posts))
         }
         print('response_data_posts: ', response_data)
         return JsonResponse(response_data, status=200)
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
-@csrf_exempt
+@api_view(['POST'])
 def get_one_post(request):
     if request.method == 'POST':
         try:
@@ -120,7 +127,7 @@ def get_one_post(request):
             parent_comments = [comment.id for comment in parent_comments]
         else :
             parent_comments = []
-
+        post['images'] = list(PostImages.objects.filter(post_id=post['id']).values_list('url', flat=True))
         post['num_comments'] = Comment.objects.filter(post_id=post['id']).count()
         post['user_name'] = User.objects.get(pk=post['user']).nickname
         post['user_avatar'] = User.objects.get(pk=post['user']).avatar_url
@@ -135,7 +142,8 @@ def get_one_post(request):
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
-@csrf_exempt
+@api_view(['POST'])
+@authentication_classes([EmptyParamsAuthentication])
 def get_one_comment(request):
     if request.method == 'POST':
         try:
@@ -144,7 +152,11 @@ def get_one_comment(request):
             return JsonResponse({'message': 'Invalid JSON data'}, status=400)
         # 处理JSON数据
         id = json_data.get('id', None)  # 获取JSON数据中的特定字段值
-        user_id = request.user.get('id')
+        user_id = None
+        if request.user['id'] is not None:
+            user_id = request.user['id']
+        else:
+            user_id = None
         print('id:',id)
         comment_search = Comment.objects.get(id=id)
         if comment_search is not None:
@@ -174,8 +186,8 @@ def get_one_comment(request):
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
+@api_view(['POST'])
 @authentication_classes([JwtQueryParamsAuthentication])
-@csrf_exempt
 def create_post(request):
     if request.method == 'POST':
         try:
@@ -183,12 +195,15 @@ def create_post(request):
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON data'}, status=400)
         # 处理JSON数据
+        print('json_data: ',json_data)
         user_id = request.user.get('id')
         title = json_data.get('title')
         images = json_data.get('images', [])
         label = json_data.get('label')
         content = json_data.get('content')
         ip = json_data.get('ip')
+
+        print('user: ' , user_id)
         post = Post.objects.create(
             user_id=user_id,
             title=title,
@@ -196,7 +211,9 @@ def create_post(request):
             label=label,
             ip=ip
         )
+
         for image_url in images:
+
             PostImages.objects.create(
                 url=image_url,
                 post=post
@@ -205,9 +222,8 @@ def create_post(request):
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
     
-
+@api_view(['DELETE'])
 @authentication_classes([JwtQueryParamsAuthentication])
-@csrf_exempt
 def delete_post(request):
     if request.method == 'DELETE':
         try:
@@ -229,9 +245,8 @@ def delete_post(request):
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
-
+@api_view(['POST'])
 @authentication_classes([JwtQueryParamsAuthentication])
-@csrf_exempt
 def comment_post(request):
     if request.method == 'POST':
         # 检查请求体中的JSON数据
@@ -239,7 +254,6 @@ def comment_post(request):
             json_data = json.loads(request.body)
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON data'}, status=400)
-
         # 检查必需的参数是否存在
         post_id = json_data.get('post_id')
         user_id = request.user.get('id')
@@ -273,8 +287,8 @@ def comment_post(request):
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
+@api_view(['POST'])
 @authentication_classes([JwtQueryParamsAuthentication])
-@csrf_exempt
 def reply_comment(request):
     if request.method == 'POST':
         # 检查请求体中的JSON数据
@@ -321,9 +335,9 @@ def reply_comment(request):
         return JsonResponse(response_data, status=200)
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
-    
+
+@api_view(['PUT'])
 @authentication_classes([JwtQueryParamsAuthentication])
-@csrf_exempt
 def change_post_reaction(request):
     if request.method == 'PUT':
         # 解析请求体中的JSON数据
@@ -395,8 +409,8 @@ def change_post_reaction(request):
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
+@api_view(['DELETE'])
 @authentication_classes([JwtQueryParamsAuthentication])
-@csrf_exempt
 def delete_comment(request):
     if request.method == 'DELETE':
         # 获取查询参数
@@ -420,8 +434,8 @@ def delete_comment(request):
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
+@api_view(['PUT'])
 @authentication_classes([JwtQueryParamsAuthentication])
-@csrf_exempt
 def change_comment_reaction(request):
     if request.method == 'PUT':
         try:
@@ -433,7 +447,7 @@ def change_comment_reaction(request):
         change = json_data.get('change')
         user_id = request.user.get('id')
         comment_id = json_data.get('comment_id')
-
+        print(user_id)
         # 检查必需的参数
         if comment_id is None or change is None :
             print('comment_id or change is required')

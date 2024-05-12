@@ -1,6 +1,6 @@
 from django.db import models
 from rest_framework import serializers
-
+import re
 
 
 
@@ -20,7 +20,7 @@ class RestTag(models.Model):
 
 class RestImage(models.Model):
     id=models.AutoField(primary_key=True)
-    image = models.ImageField(upload_to='images', max_length=100, blank=True, null=True,default='images/test.jpg')
+    image = models.ImageField(upload_to='images', max_length=100, blank=True, null=True,default='images/default_image.jpg')
 
 
 class Restaurant(models.Model):
@@ -39,7 +39,12 @@ class Restaurant(models.Model):
         old_images = list(self.images.all())
         
         # 更新图片集合
-        new_rest_images = [RestImage.objects.get_or_create(image=image)[0] for image in new_images]
+        #从media开始
+        # new_rest_images = [RestImage.objects.get_or_create(image=image)[0] for image in new_images]
+
+        # 使用列表推导式处理图片路径，删除 "media" 前缀
+        new_rest_images = [RestImage.objects.get_or_create(image=image.replace('/media/', ''))[0] for image in new_images]
+
         self.images.set(new_rest_images)
 
         # 删除不再被使用的旧图片对应的RestImage对象

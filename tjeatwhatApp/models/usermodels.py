@@ -29,7 +29,11 @@ class User(models.Model):
     token = models.IntegerField('牌子', choices=TOKEN_TYPE, default=2)
     
     
-
+    def save(self, *args, **kwargs):
+        # 在保存之前执行额外的操作
+        if self.credits >= 1000:
+            self.token=3
+        super(User, self).save(*args, **kwargs)
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

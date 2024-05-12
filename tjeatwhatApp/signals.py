@@ -7,7 +7,9 @@ def delete_restaurant_image(sender, instance, **kwargs):
     # 检查 Restaurant 对象是否有关联的图片字段
     if instance.image:
         # 删除图片文件
-        instance.image.delete(False)  # False 表示不删除数据库记录
+        print(instance.image)
+        if str(instance.image)!= 'images/default_image.jpg':
+            instance.image.delete(False)  # False 表示不删除数据库记录
 
 
 @receiver(post_delete, sender=Dish)

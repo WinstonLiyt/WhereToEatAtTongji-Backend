@@ -4,7 +4,7 @@ from weixin import WXAPPAPI
 from weixin.oauth2 import OAuth2AuthExchangeError
 from tjeatwhatApp.extensions.auth import JwtQueryParamsAuthentication
 from rest_framework.views import APIView
-from rest_framework.response import Response
+from rest_framework.response import Response 
 from tjeatwhatApp.models import usermodels,dishmodels,restaurantmodels
 
 from rest_framework import status
@@ -21,10 +21,12 @@ def get_all_store(request):
     if stores:
         store_list = []
         for store in stores:
-            store_list.append({
-                'id': store.id,
-                'name': store.name
-            })
+            dishes = dishmodels.Dish.objects.filter(restaurant_id=store.id)
+            if dishes:
+                store_list.append({
+                    'id': store.id,
+                    'name': store.name
+                })
 
         return Response({'stores': store_list},status=200)
     
@@ -45,9 +47,10 @@ def get_all_dish_by_store_id(request):
                     'id': dish.id,
                     'name': dish.name
                 })
-
-            return Response({'dishes': dish_list},status=200)
-        return Response({'error': '未找到改餐厅'}, status=404)
+            else:
+                return Response({'dishes': dish_list},status=200)
+        else:
+            return Response({'error': '未找到该餐厅'}, status=404)
     return Response({'error': '获取餐厅id失败'}, status=400)
 
 

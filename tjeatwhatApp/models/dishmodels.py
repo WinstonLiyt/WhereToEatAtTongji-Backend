@@ -15,10 +15,13 @@ class Dish(models.Model):
     restaurant = models.ForeignKey("Restaurant", on_delete=models.CASCADE)
     def update_image(self, new_image):
         # 获取当前餐厅的所有旧图片
+        #new_rest_images = [RestImage.objects.get_or_create(image=image.replace('/media/', ''))[0] for image in new_images]
+
         old_image = self.image
-        if new_image != old_image:
+        new_image=new_image.replace('/media/', '')
+        if  new_image != str(old_image):
             old_image.delete()
-        self.image.set(new_image)
+        self.image=new_image
                 
 
 

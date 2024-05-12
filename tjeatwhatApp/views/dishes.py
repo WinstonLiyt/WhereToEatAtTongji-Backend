@@ -9,23 +9,26 @@ from ..models.usermodels import User
 from ..apps import TjeatwhatappConfig
 from rest_framework.response import Response
 import requests
+from django.db.models.functions import Coalesce
+from rest_framework.decorators import api_view, authentication_classes
+from tjeatwhatApp.extensions.auth import JwtQueryParamsAuthentication,EmptyParamsAuthentication
 
 '''菜品的增删改'''
 
-@csrf_exempt  #正式上线时去掉
-def create_dish(request,rest_id):
-    try:
-        rest = Restaurant.objects.get(pk=rest_id)
-    except Restaurant.DoesNotExist:
-        return JsonResponse({'error': 'Restanuant not found'}, status=404)
+@api_view(['POST'])
+@authentication_classes([JwtQueryParamsAuthentication])
+def create_dish(request):
     
     if request.method == 'POST':
         # 获取请求体中的数据
+        user=User.objects.get(pk=request.user.get('id'))
+        rest = Restaurant.objects.get(owner=user)
         data = json.loads(request.body)
        
         name = data.get('name', '')
         description = data.get('description', '')
         image = data.get('image', '')
+        image=image.replace('/media/', '')
         price = float(data.get('price', 0))#转成浮点数
 
         # 创建新的店铺记录
@@ -53,7 +56,8 @@ def create_dish(request,rest_id):
 
 
 
-@csrf_exempt 
+@api_view(['PUT'])
+@authentication_classes([JwtQueryParamsAuthentication])
 def update_dish(request,dish_id):
     try:
         dish = Dish.objects.get(pk=dish_id)
@@ -63,11 +67,12 @@ def update_dish(request,dish_id):
     if request.method == 'PUT':
         data = json.loads(request.body)
      
-        
+        print(data)
         dish.name = data.get('name', dish.name)
         dish.description = data.get('description', dish.description)
         dish.price = float(data.get('price', dish.price))
-        dish.update(data.get('image',dish.image))
+        if data['image']:
+            dish.update_image(data.get('image',dish.image))
         dish.save()
         return JsonResponse({'message': 'Dish updated successfully'},status=200)
     else:
@@ -76,7 +81,8 @@ def update_dish(request,dish_id):
 
 
 
-@csrf_exempt 
+@api_view(['DELETE'])
+@authentication_classes([JwtQueryParamsAuthentication])
 def delete_dish(request,dish_id):
     
     try:
@@ -92,7 +98,8 @@ def delete_dish(request,dish_id):
     
 '''获取一家店所有菜品'''
 
-@csrf_exempt  #正式上线时去掉
+
+@api_view(['GET'])
 def get_all_dish(request,rest_id):
     try:
         rest = Restaurant.objects.get(pk=rest_id)
@@ -108,7 +115,7 @@ def get_all_dish(request,rest_id):
 
 
 
-@csrf_exempt  #正式上线时去掉
+@api_view(['GET'])
 def get_dish(request,dish_id):
     if request.method == 'GET':
          try:
@@ -128,7 +135,7 @@ def get_dish(request,dish_id):
 '''获取菜品评价'''
 #需要返回一个总平均分
 
-@csrf_exempt  #正式上线时去掉
+@api_view(['GET'])
 def get_dish_eval(request,dish_id):
     try:
         dish = Dish.objects.get(pk=dish_id)
@@ -136,8 +143,9 @@ def get_dish_eval(request,dish_id):
         return JsonResponse({'error': 'Dish not found'}, status=404)
     
     if request.method == 'GET':
-         avg_score = DishEval.objects.filter(dish=dish).aggregate(avg_value=Avg('score'))['avg_value']
-         avg_score=round(avg_score,1)
+         avg_data = DishEval.objects.filter(dish=dish).aggregate(avg_value=Avg('score'))
+         avg_score = avg_data['avg_value'] if avg_data['avg_value'] is not None else 0
+         avg_score= round(avg_score,1)
          dish_evals = DishEval.objects.filter(dish=dish)
          response = DishEvalSerializer(dish_evals, many=True)
          return JsonResponse({'avg_score':avg_score,'data':response.data},status=200)
@@ -146,17 +154,14 @@ def get_dish_eval(request,dish_id):
 
 '''顾客评论/删除评论菜品'''
 
-@csrf_exempt  #正式上线时去掉
-def create_dish_eval(request,user_id,dish_id):
-    try:
-        user = User.objects.get(pk=user_id)
-    except User.DoesNotExist:
-        return JsonResponse({'error': 'User not found'}, status=404)
-    try:
-        dish = Dish.objects.get(pk=dish_id)
-    except Dish.DoesNotExist:
-        return JsonResponse({'error': 'Dish not found'}, status=404)
-
+@api_view(['POST'])
+@authentication_classes([JwtQueryParamsAuthentication])
+def create_dish_eval(request,dish_id):
+    
+    user = User.objects.get(pk=request.user.get('id'))
+    
+    dish = Dish.objects.get(pk=dish_id)
+    
     if request.method == 'POST':
         # 获取请求体中的数据
         data = json.loads(request.body)
@@ -185,9 +190,10 @@ def create_dish_eval(request,user_id,dish_id):
     else:
         return JsonResponse({'message': 'Only POST requests are allowed'}, status=405)
 
-@csrf_exempt 
+
+@api_view(['DELETE'])
+@authentication_classes([JwtQueryParamsAuthentication])
 def delete_dish_eval(request,eval_id):
-    
     try:
         dish_eval = DishEval.objects.get(pk=eval_id)
     except DishEval.DoesNotExist:
@@ -202,7 +208,7 @@ def delete_dish_eval(request,eval_id):
 
 
 '''搜索店铺/菜品''' 
-@csrf_exempt  #正式上线时去掉
+@api_view(['GET'])
 def search(request,name):  
     def common_char(str,wlist):
         list_char=[]

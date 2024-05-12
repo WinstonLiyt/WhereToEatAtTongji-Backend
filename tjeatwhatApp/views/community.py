@@ -75,7 +75,7 @@ def search_posts(request):
             user_id = None
     
         # 搜索数据库中含有content的所有帖子
-        posts = Post.objects.filter(content__icontains=content)  # 大小写不敏感
+        posts = Post.objects.filter(title__icontains=content)  # 大小写不敏感
         if posts.exists():
             posts = list(posts)
             serializer = PostSerializer(posts, many=True)

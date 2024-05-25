@@ -2,9 +2,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # path('restaurant/<int:user_id>/create/', views.create_restaurant,name="create_restaurant"),
+   
     path('restaurant/update/',  views.update_restaurant,name="update_restaurant"),
-    # path('restaurant/<int:rest_id>/delete/',  views.delete_restaurant,name="delete_restaurant"),
     path('restaurant/<int:rest_id>/',views.get_rest,name='get_rest'),
     path('restaurant/',views.get_self_rest,name='get_self_rest'),
     path('dish/create/', views.create_dish,name="create_dish"),
@@ -50,6 +49,8 @@ urlpatterns = [
     path('posts/change_post_reaction/', views.change_post_reaction, name='change_reaction'),
     path('posts/delete_comment/', views.delete_comment, name='delete_comment'),
     path('posts/change_comment_reaction/', views.change_comment_reaction, name='delete_reply'),
+    path('posts/load_msg/',view.load_msg,name='load_msg'),
+    path('posts/delete_msg',view.delete_msg,name='delete_msg')
     # path('uploads/', views.upload_image, name='upload_image'),
     # path('create/', views.create_user, name='create_user'),
 ]

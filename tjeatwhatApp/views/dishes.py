@@ -212,9 +212,16 @@ def delete_dish_eval(request,eval_id):
 def search(request,name):  
     def common_char(str,wlist):
         list_char=[]
+        num=0
+        a=wlist[-1]
         for w in wlist:
-            list_char+=list(w)
-        return set(list_char)&set(list(str))
+            if str== w:
+                num+=len(a)/2
+        tmp=set(list(a))&set(list(str))
+       
+        num+=len(tmp)
+        
+        return num
     if request.method == 'GET':
         try:
             # sim=TjeatwhatappConfig.model.most_similar(name, topn=10)
@@ -229,22 +236,22 @@ def search(request,name):
 
             response = requests.get(url, params={'name': name})
             
-            sims =response.json()['sim']
-            expanded_words=[i[0] for i in sims]+list(name)
+            sims =response.json()['sim'][0:3]
+            expanded_words=[i[0] for i in sims]+[name]
 
             all_restaurants = Restaurant.objects.all()
             all_dishes=Dish.objects.all()
 
             # 进行重合字符数计算，并排序
             rest = sorted(
-            [r for r in all_restaurants if len(common_char(r.name,expanded_words)) > 0],
-            key=lambda r: len(common_char(r.name,expanded_words)),
+            [r for r in all_restaurants if common_char(r.name,expanded_words) > 0],
+            key=lambda r: common_char(r.name,expanded_words),
             reverse=True
             )
 
             dish = sorted(
-            [r for r in all_dishes if len(common_char(r.name,expanded_words)) > 0],
-            key=lambda r:len(common_char(r.name,expanded_words)),
+            [r for r in all_dishes if common_char(r.name,expanded_words)> 0],
+            key=lambda r:common_char(r.name,expanded_words),
             reverse=True
             )
             

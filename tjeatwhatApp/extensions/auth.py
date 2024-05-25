@@ -15,7 +15,7 @@ class EmptyParamsAuthentication(BaseAuthentication):
         # print("token:",token)
         if not token:
             print("token不存在  ")
-            return ({'id':""},None)
+            return ({'id': None},None)
             # raise AuthenticationFailed({'code': 1003, 'error': 'token未提供'})
         # 使用django配置中的SECRET_KEY作为盐
         salt = settings.SECRET_KEY

@@ -1,4 +1,3 @@
-# 修一些报错
 import django
 from django.utils.encoding import smart_str
 django.utils.encoding.smart_text = smart_str
@@ -12,7 +11,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from tjeatwhatApp.extensions.auth import JwtQueryParamsAuthentication,EmptyParamsAuthentication
 # from rest_framework.decorators import authentication_classes, permission_classes
-from ..models.communitymodels import Post, Comment, PostImages, Upvote, Star, UpvoteComment
+from ..models.communitymodels import Post, Comment, PostImages, Upvote, Star, UpvoteComment, Message
 from ..models.usermodels import User
 from rest_framework import serializers
 from rest_framework.decorators import api_view, authentication_classes
@@ -20,48 +19,20 @@ from rest_framework.decorators import api_view, authentication_classes
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = '__all__'  # 或者指定您希望序列化的字段
+        fields = '__all__'
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = '__all__'  # 或者指定您希望序列化的字段
+        fields = '__all__'  
 
-# 测试专用
-# def create_user(request):
-#     if request.method == 'POST':
-#         json_data = json.loads(request.body)
-#         username = json_data.get('username', None)
-#         avatar = json_data.get('avatar', None)
-#         # 创建用户
-#         user = User.objects.create(nickname=username, avatar_url=avatar)
-#         return JsonResponse({'message': 'User created successfully', 'user_id': user.id})
-#         # 返回用户信息
-
-# @csrf_exempt
-# def upload_image(request):
-#     print("imhere", request.FILES)
-#     if request.method == 'POST' and request.FILES.get('file'):
-#         file= request.FILES['file']
-#         # 处理上传的文件，保存到服务器上
-#         _, ext = os.path.splitext(file.name)
-#         new_name = f"{uuid4().hex}{ext}"
-
-#         where = '%s/images/%s' % (settings.MEDIA_ROOT, new_name)
-#         # 分块保存image
-#         content = file.chunks()
-#         with open(where, 'wb') as f:
-#             for i in content:
-#                 f.write(i)
-#         print(new_name)
-#         return JsonResponse({'new_name': new_name, 'message': 'File uploaded successfully'},status=200)
-#     else:
-#         print('failed')
-#         return JsonResponse({'message': 'Only POST requests with file uploads are allowed'}, status=405)
+class MessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = '__all__'
 
 @api_view(['POST'])
 @authentication_classes([EmptyParamsAuthentication])
-
 def search_posts(request):
     if request.method == 'POST':
         json_data = json.loads(request.body)
@@ -73,7 +44,7 @@ def search_posts(request):
             user_id = request.user['id']
         else:
             user_id = None
-    
+        print('user:', user_id)
         # 搜索数据库中含有content的所有帖子
         posts = Post.objects.filter(title__icontains=content)  # 大小写不敏感
         if posts.exists():
@@ -101,7 +72,7 @@ def search_posts(request):
             'message': 'Success',
             'posts': list(reversed(serialized_posts))
         }
-        print('response_data_posts: ', response_data)
+        # print('response_data_posts: ', response_data)
         return JsonResponse(response_data, status=200)
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
@@ -202,8 +173,9 @@ def create_post(request):
         label = json_data.get('label')
         content = json_data.get('content')
         ip = json_data.get('ip')
-
-        print('user: ' , user_id)
+        user = User.objects.get(id=user_id)
+        user.credits += 50
+        user.save()
         post = Post.objects.create(
             user_id=user_id,
             title=title,
@@ -211,7 +183,6 @@ def create_post(request):
             label=label,
             ip=ip
         )
-
         for image_url in images:
 
             PostImages.objects.create(
@@ -262,17 +233,25 @@ def comment_post(request):
         if not post_id or not user_id or not content:
             return JsonResponse({'message': 'post_id, user_id, and content are required'}, status=400)
 
-        # 检查请求头中的token参数进行身份验证（如果需要）
-        token = request.headers.get('token')
-        # 在这里进行身份验证和其他必要的检查
-
+        user = User.objects.get(id=user_id)
+        user.credits += 10
+        user.save()
         # 创建新的评论对象并保存到数据库
+
 
         comment = Comment.objects.create(
             post_id=post_id,
             user_id=user_id,
             content=content,
         )
+
+        # 待测试
+        Message.objects.create(
+            category=2,
+            replier_id=user_id,
+            receiver_id=Post.objects.get(id=post_id).user_id
+        )
+
         user = User.objects.get(id=user_id)
         comment_data = {
             'id': comment.id,
@@ -300,10 +279,16 @@ def reply_comment(request):
         # 检查必需的参数是否存在
         parent_comment_id = json_data.get('parent_comment_id')
         user_id = request.user.get('id')
+        replied_id = json_data.get('replied_id')
         content = json_data.get('content')
+        user = User.objects.get(id=user_id)
+        user.credits += 5
+        user.save()
 
         if not parent_comment_id or not user_id or not content:
             return JsonResponse({'message': 'parent_comment_id, user_id, and content are required'}, status=400)
+        
+
 
         # 在这里进行身份验证和其他必要的检查
         parent_comment = Comment.objects.get(id=parent_comment_id)
@@ -315,6 +300,14 @@ def reply_comment(request):
             is_post_comment=False,
             post_id=parent_comment.post_id,
         )
+
+        # 待测试
+        Message.objects.create(
+            category=2,
+            replier_id=user_id,
+            receiver_id=replied_id
+        )
+
         user = User.objects.get(id=user_id)
         # 构造评论的信息
         comment_data = {
@@ -360,8 +353,6 @@ def change_post_reaction(request):
         if field not in ['num_upvotes', 'num_stars']:
             return JsonResponse({'message': 'Invalid field'}, status=400)
 
-        # 这里添加对用户权限的检查，确定用户是否有权限执行操作
-
         # 在这里执行更新帖子统计信息的操作
         try:
             post = Post.objects.get(id=post_id)
@@ -371,18 +362,33 @@ def change_post_reaction(request):
         # 更新帖子统计信息
         if field == 'num_upvotes':
             if change:
+                user = User.objects.get(id=user_id)
+                user.credits += 5
+                user.save()
                 post.num_upvotes += 1
                 Upvote.objects.create(
                     user_id=user_id,
                     post_id=post_id
                 )
+                # 待测试
+                Message.objects.create(
+                    category=0,
+                    replier_id=user_id,
+                    receiver_id=Post.objects.get(id=post_id).user_id
+                )
             else:
                 post.num_upvotes -= 1
                 upvote = Upvote.objects.get(user_id=user_id, post_id=post_id)
+                # 待测试
+                notifications = Message.objects.filter(category=0,replier_id=user_id,receiver_id=Post.objects.get(id=post_id).user_id)
+                if notifications.exists():
+                    notifications.first().delete()
                 if upvote:
                     upvote.delete()
                 else:
                     return JsonResponse({'message': 'Upvote not found'}, status=404)
+                
+    
         elif field == 'num_stars':
             if change:
                 post.num_stars += 1
@@ -390,9 +396,19 @@ def change_post_reaction(request):
                     user_id=user_id,
                     post_id=post_id
                 )
+                # 待测试
+                Message.objects.create(
+                    category=1,
+                    replier_id=user_id,
+                    receiver_id=Post.objects.get(id=post_id).user_id
+                )
             else:
                 post.num_stars -= 1
                 star = Star.objects.get(user_id=user_id, post_id=post_id)
+                # 待测试
+                notifications = Message.objects.filter(category=1,replier_id=user_id,receiver_id=Post.objects.get(id=post_id).user_id)
+                if notifications.exists():
+                    notifications.first().delete()
                 if star:
                     star.delete()
                 else:
@@ -418,13 +434,18 @@ def delete_comment(request):
             json_data = json.loads(request.body)
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON data'}, status=400)
-        
+        replied_id = json_data.get('replied_id')
         comment_id = json_data.get('id')
         comment = Comment.objects.get(id=comment_id)
         if comment:
             comment.delete()
         else:
             return JsonResponse({'message': 'Comment not found'}, status=404)
+        # 待测试
+        notifications = Message.objects.filter(category=2,replier_id=request.user.get('id'),receiver_id=replied_id)
+        if notifications.exists():
+            notifications.first().delete()
+
         # 构造返回的JSON数据
         response_data = {
             'message': 'Success'
@@ -447,14 +468,11 @@ def change_comment_reaction(request):
         change = json_data.get('change')
         user_id = request.user.get('id')
         comment_id = json_data.get('comment_id')
-        print(user_id)
         # 检查必需的参数
         if comment_id is None or change is None :
             print('comment_id or change is required')
             return JsonResponse({'message': 'comment_id or change is required'}, status=400)
       
-        # 这里添加对用户权限的检查，确定用户是否有权限执行操作
-
         # 在这里执行更新评论的操作
         try:
             comment = Comment.objects.get(id=comment_id)
@@ -463,14 +481,28 @@ def change_comment_reaction(request):
 
         # 更新评论的点赞数
         if change:
+            user = User.objects.get(id=user_id)
+            user.credits += 2
+            user.save()
             comment.num_upvotes += 1
             UpvoteComment.objects.create(
                 user_id=user_id,
                 comment_id=comment_id
             )
+            # 待测试
+            Message.objects.create(
+                category=0,
+                replier_id=user_id,
+                receiver_id=Comment.objects.get(id=comment_id).user_id
+            )
+
         else:
             comment.num_upvotes -= 1
             upvote = UpvoteComment.objects.get(user_id=user_id, comment_id=comment_id)
+            # 待测试
+            notifications = Message.objects.filter(category=0,replier_id=user_id,receiver_id=Comment.objects.get(id=comment_id).user_id)
+            if notifications.exists():
+                notifications.first().delete()
             if upvote:
                 upvote.delete()
             else:
@@ -488,3 +520,45 @@ def change_comment_reaction(request):
         return JsonResponse(response_data, status=200)
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
+
+
+@api_view(['GET'])
+@authentication_classes([JwtQueryParamsAuthentication])
+def load_msg(request):
+    if request.method == 'GET':
+        user_id = request.user.get('id')
+        # 待测试
+        notifications = Message.objects.filter(receiver_id=user_id)
+        if notifications.exists():
+            notifications = MessageSerializer(list(notifications)).data
+            for notification in notifications:
+                if notification.replier_id is not None:
+                    notification['user_name'] = User.objects.get(id=notification['replier']).nickname
+                    notification['user_avatar'] = User.objects.get(id=notification['replier']).avatar_url
+        else:
+            notifications = []
+        response_data = {
+            'message': 'Success',
+            'notifications': list(notifications)
+        }
+        return JsonResponse(response_data, status=200)
+    else:
+        return JsonResponse({'message': 'Method not allowed'}, status=405)
+
+@api_view(['DELETE'])
+@authentication_classes([JwtQueryParamsAuthentication])
+def delete_msg(request):
+    if request.method == 'DELETE':
+        user_id = request.user.get('id')
+        # 待测试
+        notifications = Message.objects.filter(receiver_id=user_id)
+        if notifications.exists():
+            notifications.delete()
+            return JsonResponse({'message': 'Success'}, status=204)
+        else:
+            return JsonResponse({'message': 'Messages not found'}, status=404)
+        
+        return JsonResponse(response_data, status=200)
+    else:
+        return JsonResponse({'message': 'Method not allowed'}, status=405)
+

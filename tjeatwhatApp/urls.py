@@ -49,8 +49,8 @@ urlpatterns = [
     path('posts/change_post_reaction/', views.change_post_reaction, name='change_reaction'),
     path('posts/delete_comment/', views.delete_comment, name='delete_comment'),
     path('posts/change_comment_reaction/', views.change_comment_reaction, name='delete_reply'),
-    path('posts/load_msg/',view.load_msg,name='load_msg'),
-    path('posts/delete_msg',view.delete_msg,name='delete_msg')
+    path('posts/load_msg/',views.load_msg,name='load_msg'),
+    path('posts/delete_msg/',views.delete_msg,name='delete_msg')
     # path('uploads/', views.upload_image, name='upload_image'),
     # path('create/', views.create_user, name='create_user'),
 ]

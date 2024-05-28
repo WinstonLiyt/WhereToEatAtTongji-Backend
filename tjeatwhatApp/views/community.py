@@ -279,7 +279,8 @@ def reply_comment(request):
         # 检查必需的参数是否存在
         parent_comment_id = json_data.get('parent_comment_id')
         user_id = request.user.get('id')
-        replied_id = json_data.get('replied_id')
+        comment_id = json_data.get('replied_id')
+        replied_id = Comment.objects.get(pk=comment_id).user_id
         content = json_data.get('content')
         user = User.objects.get(id=user_id)
         user.credits += 5
@@ -365,7 +366,7 @@ def change_post_reaction(request):
                 user = User.objects.get(id=user_id)
                 user.credits += 5
                 user.save()
-                post.num_upvotes += 1
+                # post.num_upvotes += 1
                 Upvote.objects.create(
                     user_id=user_id,
                     post_id=post_id
@@ -376,8 +377,10 @@ def change_post_reaction(request):
                     replier_id=user_id,
                     receiver_id=Post.objects.get(id=post_id).user_id
                 )
+                post.num_upvotes = Upvote.objects.filter(post_id=post_id).count()
+
             else:
-                post.num_upvotes -= 1
+                # post.num_upvotes -= 1
                 upvote = Upvote.objects.get(user_id=user_id, post_id=post_id)
                 # 待测试
                 notifications = Message.objects.filter(category=0,replier_id=user_id,receiver_id=Post.objects.get(id=post_id).user_id)
@@ -387,11 +390,12 @@ def change_post_reaction(request):
                     upvote.delete()
                 else:
                     return JsonResponse({'message': 'Upvote not found'}, status=404)
-                
+                post.num_upvotes = Upvote.objects.filter(post_id=post_id).count()
+
     
         elif field == 'num_stars':
             if change:
-                post.num_stars += 1
+                # post.num_stars += 1
                 Star.objects.create(
                     user_id=user_id,
                     post_id=post_id
@@ -402,8 +406,10 @@ def change_post_reaction(request):
                     replier_id=user_id,
                     receiver_id=Post.objects.get(id=post_id).user_id
                 )
+                post.num_stars = Star.objects.filter(post_id=post_id).count()
+
             else:
-                post.num_stars -= 1
+                # post.num_stars -= 1
                 star = Star.objects.get(user_id=user_id, post_id=post_id)
                 # 待测试
                 notifications = Message.objects.filter(category=1,replier_id=user_id,receiver_id=Post.objects.get(id=post_id).user_id)
@@ -413,6 +419,7 @@ def change_post_reaction(request):
                     star.delete()
                 else:
                     return JsonResponse({'message': 'Star not found'}, status=404)
+                post.num_stars = Star.objects.filter(post_id=post_id).count()
 
         # 保存更新后的帖子对象
         post.save()
@@ -435,6 +442,11 @@ def delete_comment(request):
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON data'}, status=400)
         replied_id = json_data.get('replied_id')
+        print(type(replied_id))
+        if replied_id > 0:
+            replied_id = Comment.objects.get(pk=replied_id).user_id
+        else:
+            replied_id = Post.objects.get(pk=-replied_id).user_id
         comment_id = json_data.get('id')
         comment = Comment.objects.get(id=comment_id)
         if comment:
@@ -484,7 +496,7 @@ def change_comment_reaction(request):
             user = User.objects.get(id=user_id)
             user.credits += 2
             user.save()
-            comment.num_upvotes += 1
+            # comment.num_upvotes += 1
             UpvoteComment.objects.create(
                 user_id=user_id,
                 comment_id=comment_id
@@ -495,9 +507,10 @@ def change_comment_reaction(request):
                 replier_id=user_id,
                 receiver_id=Comment.objects.get(id=comment_id).user_id
             )
+            comment.num_upvotes = UpvoteComment.objects.filter(comment_id=comment_id).count()
 
         else:
-            comment.num_upvotes -= 1
+            # comment.num_upvotes -= 1
             upvote = UpvoteComment.objects.get(user_id=user_id, comment_id=comment_id)
             # 待测试
             notifications = Message.objects.filter(category=0,replier_id=user_id,receiver_id=Comment.objects.get(id=comment_id).user_id)
@@ -507,7 +520,7 @@ def change_comment_reaction(request):
                 upvote.delete()
             else:
                 return JsonResponse({'message': 'Upvote not found'}, status=404)
-
+            comment.num_upvotes = UpvoteComment.objects.filter(comment_id=comment_id).count()
         # 保存更新后的评论对象
         comment.save()
 
@@ -529,17 +542,22 @@ def load_msg(request):
         user_id = request.user.get('id')
         # 待测试
         notifications = Message.objects.filter(receiver_id=user_id)
+        res = []
         if notifications.exists():
-            notifications = MessageSerializer(list(notifications)).data
+            notifications = list(notifications)
+            print(notifications)
+            notifications = MessageSerializer(notifications,many=True).data
             for notification in notifications:
-                if notification.replier_id is not None:
+                if notification['replier'] is not None:
                     notification['user_name'] = User.objects.get(id=notification['replier']).nickname
-                    notification['user_avatar'] = User.objects.get(id=notification['replier']).avatar_url
+                    notification['user_avatar'] = 'http://1.92.154.154:80/media/avatar/' + User.objects.get(id=notification['replier']).avatar_url
+                if notification['replier'] != notification['receiver']:
+                    res.append(notification)
         else:
-            notifications = []
+            res = []
         response_data = {
             'message': 'Success',
-            'notifications': list(notifications)
+            'notifications': res
         }
         return JsonResponse(response_data, status=200)
     else:
@@ -548,10 +566,13 @@ def load_msg(request):
 @api_view(['DELETE'])
 @authentication_classes([JwtQueryParamsAuthentication])
 def delete_msg(request):
+    print("HELLO")
     if request.method == 'DELETE':
         user_id = request.user.get('id')
         # 待测试
+        print(user_id)
         notifications = Message.objects.filter(receiver_id=user_id)
+        print(notifications)
         if notifications.exists():
             notifications.delete()
             return JsonResponse({'message': 'Success'}, status=204)

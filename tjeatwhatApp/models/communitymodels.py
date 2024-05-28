@@ -44,8 +44,8 @@ class UpvoteComment(models.Model):
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
 
 class Message(models.Model):
-    id = models.AutoField(primary_key=True)
-    category = models.IntegerField(default=0)
-    replier = models.ForeignKey(User, on_delete=models.CASCADE)
-    receiver = models.ForeignKey(User, on_delete=models.CASCADE)
+     id = models.AutoField(primary_key=True)
+     category = models.IntegerField(default=0)
+     replier = models.ForeignKey(User, on_delete=models.CASCADE, related_name='replier')
+     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='receiver')
     

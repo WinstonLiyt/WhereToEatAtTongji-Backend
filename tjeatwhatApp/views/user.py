@@ -12,6 +12,89 @@ from uuid import uuid4
 import urllib.request
 import os
 
+##管理员禁用用户或激活用户
+@api_view(['POST'])
+@authentication_classes([JwtQueryParamsAuthentication])
+def setUserStatus(request,*args,**kwargs):
+    user_id = request.user.get('id')
+    if not user_id:
+        return Response({'msg': '没有id'}, status=403)
+    user = usermodels.User.objects.get(id=user_id)
+    if user.type!=3:
+        return Response({'msg':'非管理员，没有权限'},status=401)
+    setUser_id=request.data.get('userid')
+    setUser_status=request.data.get('status')
+    if not setUser_id:
+        return Response({'msg': '没有id'}, status=403)
+    setUser=usermodels.User.objects.get(id=setUser_id)
+    if not setUser:
+        return Response({'msg':'没有该用户'},status=404)
+    setUser.status=setUser_status
+    setUser.save()
+    return Response({'msg':'success'},status=200)
+
+##管理员设置用户信息
+@api_view(['POST'])
+@authentication_classes([JwtQueryParamsAuthentication])
+def setUserinfoByManager(request,*args,**kwargs):
+    user_id = request.user.get('id')
+    if not user_id:
+        return Response({'msg': '没有id'}, status=403)
+    user = usermodels.User.objects.get(id=user_id)
+    if user.type!=3:
+        return Response({'msg':'非管理员，没有权限'},status=401)
+    setUser_id=request.data.get('userid')
+    if not setUser_id:
+        return Response({'msg': '没有id'}, status=403)
+    setUser=usermodels.User.objects.get(id=setUser_id)
+    if not setUser:
+        return Response({'msg':'没有该用户'},status=404)
+    
+    new_credits=int(request.data.get('credits'))
+    setUser.credits=new_credits
+    setUser.save()
+    return Response({'msg': 'success'}, status=200)
+
+##管理员获取用户列表
+@api_view(['GET'])
+@authentication_classes([JwtQueryParamsAuthentication])
+def get_user_list(request,*args,**kwargs):
+    user_id = request.user.get('id')
+    if not user_id:
+        return Response({'msg': '没有id'}, status=403)
+    user = usermodels.User.objects.get(id=user_id)
+    if user.type!=3:
+        return Response({'msg':'非管理员，没有权限'},status=401)
+    # users=usermodels.User.objects.all().values('id','nickname','type','status')
+    users = usermodels.User.objects.filter(type__in=[1, 2]).values('id', 'nickname', 'type', 'status')
+
+    if users:
+        return Response({'data':users},status=200)
+    else:
+        return Response({'message':'no user'},status=404)
+
+##管理员获取指定用户信息
+@api_view(['GET'])
+@authentication_classes([JwtQueryParamsAuthentication])
+def get_user_info_by_manager(request,*args,**kwargs):
+    user_id = request.user.get('id')
+    if not user_id:
+        return Response({'msg': '没有id'}, status=403)
+    user = usermodels.User.objects.get(id=user_id)
+    if user.type!=3:
+        return Response({'msg':'非管理员，没有权限'},status=401)
+    getUser_id = request.GET.get('userid')
+    if not getUser_id:
+        return Response({'msg': '没有id'}, status=403)
+    getUser=usermodels.User.objects.get(id=getUser_id)
+    if not getUser:
+        return Response({'msg':'没有该用户'},status=404)
+    userInfo={'name':getUser.nickname,
+    'avatar_url':getUser.avatar_url,
+    'signature':getUser.signature,
+    'credits':getUser.credits,
+    'status':getUser.status}
+    return Response(userInfo, status=200)
 
 
 
@@ -47,7 +130,7 @@ def upload_avatar(request,*args,**kwargs):
         # 处理上传的文件，保存到服务器上
         _, ext = os.path.splitext(file.name)
         new_name = f"{uuid4().hex}{ext}"
-
+        # print("newname:",new_name)
         where = '%s/avatar/%s' % (settings.MEDIA_ROOT, new_name)
         # 分块保存image
         content = file.chunks()

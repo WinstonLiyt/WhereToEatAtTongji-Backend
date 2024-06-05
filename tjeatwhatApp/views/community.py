@@ -10,11 +10,11 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from tjeatwhatApp.extensions.auth import JwtQueryParamsAuthentication,EmptyParamsAuthentication
-# from rest_framework.decorators import authentication_classes, permission_classes
 from ..models.communitymodels import Post, Comment, PostImages, Upvote, Star, UpvoteComment, Message
 from ..models.usermodels import User
 from rest_framework import serializers
 from rest_framework.decorators import api_view, authentication_classes
+from django.http import HttpResponse
 
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
@@ -550,7 +550,7 @@ def load_msg(request):
             for notification in notifications:
                 if notification['replier'] is not None:
                     notification['user_name'] = User.objects.get(id=notification['replier']).nickname
-                    notification['user_avatar'] = 'http://1.92.154.154:80/media/avatar/' + User.objects.get(id=notification['replier']).avatar_url
+                    notification['user_avatar'] = 'https://tjeatwhat.cn/media/avatar/' + User.objects.get(id=notification['replier']).avatar_url
                 if notification['replier'] != notification['receiver']:
                     res.append(notification)
         else:
@@ -583,3 +583,7 @@ def delete_msg(request):
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
+
+
+def helloworld(request):
+    return HttpResponse("Hello, this is a simple string response.")

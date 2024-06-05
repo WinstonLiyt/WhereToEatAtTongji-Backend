@@ -19,7 +19,10 @@ class User(models.Model):
         (2,'蓝牌'),
         (3,'黄牌')
     )
-
+    STATUS_TYPE = (
+        (0, '禁用'),
+        (1,'激活')
+    )
     openid = models.CharField('微信openid', max_length=100, unique=True)
     nickname = models.CharField('微信昵称', max_length=100, blank=True, null=True)
     avatar_url = models.URLField('微信头像', blank=True, null=True)
@@ -27,7 +30,7 @@ class User(models.Model):
     type = models.IntegerField('用户类型', choices=USER_TYPE, default=1)
     credits = models.IntegerField('经验值', default=0)
     token = models.IntegerField('牌子', choices=TOKEN_TYPE, default=2)
-    
+    status=models.IntegerField('激活状态', choices=TOKEN_TYPE, default=1)
     
     def save(self, *args, **kwargs):
         # 在保存之前执行额外的操作

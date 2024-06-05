@@ -33,6 +33,11 @@ urlpatterns = [
     path('user/getInfo',views.get_user_info,name='get_user_info'),
     path('user/getId',views.get_user_id,name='get_user_id'),
     path('user/uploadAvatar',views.upload_avatar,name='upload_avatar'),
+    path('user/setStatus/',views.setUserStatus,name='setUserStatus'),
+    path('user/setInfoByManager/',views.setUserinfoByManager,name='setUserinfoByManager'),
+    path('user/getAllUsers/',views.get_user_list,name='get_user_list'),
+    path('user/getUserInfoByManager/',views.get_user_info_by_manager,name='get_user_info_by_manager'),
+    
 
     path('recommend/getAllStore', views.get_all_store, name='get_all_store'),
     path('recommend/getAllDishesByStoreID/', views.get_all_dish_by_store_id, name='getAllDishesByStoreID'),
@@ -50,7 +55,11 @@ urlpatterns = [
     path('posts/delete_comment/', views.delete_comment, name='delete_comment'),
     path('posts/change_comment_reaction/', views.change_comment_reaction, name='delete_reply'),
     path('posts/load_msg/',views.load_msg,name='load_msg'),
-    path('posts/delete_msg/',views.delete_msg,name='delete_msg')
+    path('posts/delete_msg/',views.delete_msg,name='delete_msg'),
+    path('',views.helloworld,name='helloworld')
+
     # path('uploads/', views.upload_image, name='upload_image'),
+
+
     # path('create/', views.create_user, name='create_user'),
 ]

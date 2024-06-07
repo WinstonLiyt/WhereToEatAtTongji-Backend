@@ -10,7 +10,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from tjeatwhatApp.extensions.auth import JwtQueryParamsAuthentication,EmptyParamsAuthentication
-from ..models.communitymodels import Post, Comment, PostImages, Upvote, Star, UpvoteComment, Message
+from ..models.communitymodels import Post, Comment, PostImages, Upvote, Star, UpvoteComment, Message, Draft, DraftImages
 from ..models.usermodels import User
 from rest_framework import serializers
 from rest_framework.decorators import api_view, authentication_classes
@@ -84,9 +84,7 @@ def get_one_post(request):
             json_data = json.loads(request.body)
         except json.JSONDecodeError:
             return JsonResponse({'message': 'Invalid JSON data'}, status=400)
-        print("json_data", json_data)
         id = json_data.get('id', None)
-        print("id:", id)
         try:
             post = Post.objects.get(id=id)
         except Post.DoesNotExist:
@@ -168,6 +166,9 @@ def create_post(request):
         # 处理JSON数据
         print('json_data: ',json_data)
         user_id = request.user.get('id')
+        drafts = Draft.objects.filter(user_id=user_id)
+        if drafts.exists():
+            drafts.delete()
         title = json_data.get('title')
         images = json_data.get('images', [])
         label = json_data.get('label')
@@ -184,7 +185,6 @@ def create_post(request):
             ip=ip
         )
         for image_url in images:
-
             PostImages.objects.create(
                 url=image_url,
                 post=post
@@ -578,8 +578,6 @@ def delete_msg(request):
             return JsonResponse({'message': 'Success'}, status=204)
         else:
             return JsonResponse({'message': 'Messages not found'}, status=404)
-        
-        return JsonResponse(response_data, status=200)
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)
 
@@ -587,3 +585,70 @@ def delete_msg(request):
 
 def helloworld(request):
     return HttpResponse("Hello, this is a simple string response.")
+
+
+@api_view(['POST'])
+@authentication_classes([JwtQueryParamsAuthentication])
+def save_draft(request):
+    if request.method == 'POST':
+        user_id = request.user.get('id')
+        try:
+            json_data = json.loads(request.body)
+        except json.JSONDecodeError:
+            print('Invalid JSON data')
+            return JsonResponse({'message': 'Invalid JSON data'}, status=400)
+        draft_search = Draft.objects.filter(user_id=user_id)
+        print(json_data.get('title'),json_data.get('conetent'))
+        if draft_search.exists():
+            draft = draft_search.first()
+            draft.title = json_data.get('title')
+            draft.content = json_data.get('content')
+            draft.label = json_data.get('label')
+            draft.ip = json_data.get('ip')
+            draft.save()
+            images = DraftImages.objects.filter(draft=draft)
+            if images.exists():
+                images.delete()
+        else:
+            draft = Draft.objects.create(
+                user_id = user_id,
+                title = json_data.get('title'),
+                content = json_data.get('content'),
+                label = json_data.get('label'),
+                ip = json_data.get('ip')
+            )
+        for image_url in json_data.get('images'):
+            DraftImages.objects.create(
+                url=image_url,
+                draft=draft
+            )
+        return JsonResponse({'message': 'Success'}, status=200)
+    else:
+        return JsonResponse({'message': 'Method not allowed'}, status=405)
+
+
+@api_view(['GET'])
+@authentication_classes([JwtQueryParamsAuthentication])
+def get_draft(request):
+    if request.method == 'GET':
+        user_id = request.user.get('id')
+        draft = Draft.objects.filter(user_id=user_id)
+        response_data = {
+            'title' : '',
+            'label' : '',
+            'ip' : '',
+            'content' : '',
+            'images' : []
+        }
+        if draft.exists():
+            draft = draft.first()
+            response_data = {
+                'title' : draft.title,
+                'label' : draft.label,
+                'ip' :draft.ip,
+                'content' : draft.content
+            }
+            response_data['images'] = list(DraftImages.objects.filter(draft=draft).values_list('url', flat=True))
+        return JsonResponse(response_data, status=200)
+    else:
+        return JsonResponse({'message': 'Method not allowed'}, status=405)

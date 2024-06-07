@@ -56,7 +56,9 @@ urlpatterns = [
     path('posts/change_comment_reaction/', views.change_comment_reaction, name='delete_reply'),
     path('posts/load_msg/',views.load_msg,name='load_msg'),
     path('posts/delete_msg/',views.delete_msg,name='delete_msg'),
-    path('',views.helloworld,name='helloworld')
+    path('',views.helloworld,name='helloworld'),
+    path('posts/save_draft/',views.save_draft,name='save_draft'),
+    path('posts/get_draft/',views.get_draft,name='get_draft'),
 
     # path('uploads/', views.upload_image, name='upload_image'),
 

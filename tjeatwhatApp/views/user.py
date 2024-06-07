@@ -2,7 +2,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from weixin import WXAPPAPI
 from weixin.oauth2 import OAuth2AuthExchangeError
-from tjeatwhatApp.extensions.auth import JwtQueryParamsAuthentication
+from tjeatwhatApp.extensions.auth import JwtQueryParamsAuthentication,JwtQueryParamsAuthentication2
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from tjeatwhatApp.models import usermodels,restaurantmodels
@@ -106,7 +106,7 @@ def get_user_id(request,*args,**kwargs):
 
 ##获取用户基本信息
 @api_view(['GET'])
-@authentication_classes([JwtQueryParamsAuthentication])
+@authentication_classes([JwtQueryParamsAuthentication2])
 def get_user_info(request,*args,**kwargs):
     user_id = request.user.get('id')
     if user_id:

@@ -44,8 +44,22 @@ class UpvoteComment(models.Model):
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
 
 class Message(models.Model):
-     id = models.AutoField(primary_key=True)
-     category = models.IntegerField(default=0)
-     replier = models.ForeignKey(User, on_delete=models.CASCADE, related_name='replier')
-     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='receiver')
-    
+    id = models.AutoField(primary_key=True)
+    category = models.IntegerField(default=0)
+    replier = models.ForeignKey(User, on_delete=models.CASCADE, related_name='replier')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='receiver')
+
+class Draft(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=100)
+    content = models.TextField()
+    time = models.DateTimeField(auto_now_add=True)
+    label = models.CharField(max_length=50, null=True, blank=True)
+    ip = models.CharField(max_length=50, null=True, blank=True)
+
+class DraftImages(models.Model):
+    id = models.AutoField(primary_key=True)
+    url = models.CharField(max_length=2000)
+    draft = models.ForeignKey(Draft, on_delete=models.CASCADE)
+

@@ -59,6 +59,8 @@ urlpatterns = [
     path('',views.helloworld,name='helloworld'),
     path('posts/save_draft/',views.save_draft,name='save_draft'),
     path('posts/get_draft/',views.get_draft,name='get_draft'),
+    path('posts/load_starlist/',views.load_starlist,name='load_starlist'),
+    path('posts/load_postlist/',views.load_postlist,name='load_postlist')
 
     # path('uploads/', views.upload_image, name='upload_image'),
 

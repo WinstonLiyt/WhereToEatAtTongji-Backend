@@ -31,20 +31,22 @@ class MessageSerializer(serializers.ModelSerializer):
         model = Message
         fields = '__all__'
 
+class StarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Star
+        fields = '__all__'
+
 @api_view(['POST'])
 @authentication_classes([EmptyParamsAuthentication])
 def search_posts(request):
     if request.method == 'POST':
         json_data = json.loads(request.body)
-        print(json_data)
         content = json_data.get('content', None) 
         user_id = None
-        print('user:', request.user, type(request.user))
         if request.user['id'] is not None:
             user_id = request.user['id']
         else:
             user_id = None
-        print('user:', user_id)
         # 搜索数据库中含有content的所有帖子
         posts = Post.objects.filter(title__icontains=content)  # 大小写不敏感
         if posts.exists():
@@ -168,7 +170,7 @@ def create_post(request):
         user_id = request.user.get('id')
         drafts = Draft.objects.filter(user_id=user_id)
         if drafts.exists():
-            drafts.delete()
+            Draft.objects.filter(user_id=user_id).delete()
         title = json_data.get('title')
         images = json_data.get('images', [])
         label = json_data.get('label')
@@ -649,6 +651,62 @@ def get_draft(request):
                 'content' : draft.content
             }
             response_data['images'] = list(DraftImages.objects.filter(draft=draft).values_list('url', flat=True))
+        return JsonResponse(response_data, status=200)
+    else:
+        return JsonResponse({'message': 'Method not allowed'}, status=405)
+
+
+@api_view(['GET'])
+@authentication_classes([JwtQueryParamsAuthentication])
+def load_starlist(request):
+    if request.method == 'GET':
+        user_id = request.user.get('id')
+        stars = Star.objects.filter(user_id=user_id)
+        serialized_stars = []
+        if stars.exists():
+            stars = list(stars)
+            serializer = StarSerializer(stars, many=True)
+            serialized_stars = serializer.data
+            for star in serialized_stars:
+                post = Post.objects.get(pk=star['post'])
+                star['user_name'] = User.objects.get(pk=post.user_id).nickname
+                star['user_avatar'] = 'https://tjeatwhat.cn/media/avatar/' + User.objects.get(pk=post.user_id).avatar_url
+                star['post_id'] = star['post']
+                star['title'] = Post.objects.get(pk=star['post']).title
+                star['upvoted'] = Upvote.objects.filter(post_id=star['post'], user_id=user_id).exists()
+                star['stared'] = True
+        else:
+            serialized_stars = []
+        response_data = {
+            'message': 'Success',
+            'notifications': list(serialized_stars)
+        }
+        return JsonResponse(response_data, status=200)
+    else:
+        return JsonResponse({'message': 'Method not allowed'}, status=405)
+
+@api_view(['GET'])
+@authentication_classes([JwtQueryParamsAuthentication])
+def load_postlist(request):
+    if request.method == 'GET':
+        user_id = request.user.get('id')
+        posts = Post.objects.filter(user_id=user_id)  # 大小写不敏感
+        if posts.exists():
+            posts = list(posts)
+            serializer = PostSerializer(posts, many=True)
+            serialized_posts = serializer.data
+            for post in serialized_posts:
+                post['user_name'] = User.objects.get(pk=post['user']).nickname
+                post['user_avatar'] ='https://tjeatwhat.cn/media/avatar/' + User.objects.get(pk=post['user']).avatar_url
+                post['post_id'] = post['id']
+                post['upvoted'] = Upvote.objects.filter(post_id=post['id'], user_id=user_id).exists()
+                post['stared'] = Star.objects.filter(post_id=post['id'], user_id=user_id).exists()
+        else:
+            serialized_posts = []
+        response_data = {
+            'message': 'Success',
+            'notifications': list(serialized_posts)
+        }
         return JsonResponse(response_data, status=200)
     else:
         return JsonResponse({'message': 'Method not allowed'}, status=405)

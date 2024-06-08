@@ -349,5 +349,3 @@ def test_token_view(request):
     print("request.user:",request.user)
     print("request.auth:",request.auth)
     return Response('成功获取信息')
-
-

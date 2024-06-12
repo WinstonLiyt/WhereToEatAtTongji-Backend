@@ -586,6 +586,7 @@ def delete_msg(request):
 
 
 def helloworld(request):
+    return JsonResponse({'message': 'Success'}, status=200)
     return HttpResponse("Hello, this is a simple string response.")
 
 

@@ -93,7 +93,15 @@ def get_dish_by_user_interest(request):
 
         # 去除重复的菜品ID
         recommend_dishes_id = list(set(recommend_dishes_id))
+        if len(recommend_dishes_id)<=3:
+            all_dishes=dishmodels.Dish.objects.all()
+            if not all_dishes:
+                return Response({'error':"菜品表为空"},status=404)
         
+            # all_dishes_id=[]
+            for dish in all_dishes:
+                recommend_dishes_id.append(dish.id)
+
         #从recommend_dishes_id中随机选择一条
         random_dish_id = random.choice(recommend_dishes_id)
 

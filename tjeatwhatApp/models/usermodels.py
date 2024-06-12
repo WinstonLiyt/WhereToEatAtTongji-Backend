@@ -36,6 +36,8 @@ class User(models.Model):
         # 在保存之前执行额外的操作
         if self.credits >= 1000:
             self.token=3
+        if self.credits <1000:
+            self.token=2
         super(User, self).save(*args, **kwargs)
 
 class UserSerializer(serializers.ModelSerializer):

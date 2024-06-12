@@ -98,7 +98,7 @@ def get_dish_by_user_interest(request):
             if not all_dishes:
                 return Response({'error':"菜品表为空"},status=404)
         
-            # all_dishes_id=[]
+            
             for dish in all_dishes:
                 recommend_dishes_id.append(dish.id)
 

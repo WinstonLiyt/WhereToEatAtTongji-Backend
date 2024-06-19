@@ -46,6 +46,7 @@ class JwtQueryParamsAuthentication(BaseAuthentication):
     def authenticate(self, request):
         
         token = request.headers.get('Token')
+        print("token:",token)
         if not token:
             print("token不存在  ")
             raise TokenAuthenticationFailed({'code': 1003, 'error': 'token未提供'})
@@ -71,6 +72,7 @@ class JwtQueryParamsAuthentication2(BaseAuthentication):
     def authenticate(self, request):
         
         token = request.headers.get('Token')
+
         if not token:
             print("token不存在  ")
             raise TokenAuthenticationFailed({'code': 1003, 'error': 'token未提供'})

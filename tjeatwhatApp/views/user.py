@@ -148,6 +148,7 @@ def upload_avatar(request,*args,**kwargs):
 def login(request,*args,**kwargs):
     code = request.data.get('code')
     if code:
+        print("code:",code)
         # 使用 appid 和 app_secret 创建 WXAPPAPI 对象
         api = WXAPPAPI(appid=settings.WX_APP_ID, app_secret=settings.WX_APP_SECRET)
         try:
